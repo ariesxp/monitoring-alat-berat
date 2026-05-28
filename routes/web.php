@@ -6,6 +6,7 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\ClientController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\GajiKaryawanController;
+use App\Http\Controllers\GolonganController;
 use App\Http\Controllers\KontrakKerjaController;
 use App\Http\Controllers\LaporanHarianController;
 use App\Http\Controllers\OperatorController;
@@ -33,6 +34,7 @@ Route::middleware('auth')->group(function () {
         Route::resource('alat-berat', AlatBeratController::class);
         Route::resource('operator', OperatorController::class);
         Route::resource('client', ClientController::class);
+        Route::resource('golongan', GolonganController::class)->except(['show']);
         Route::resource('gaji', GajiKaryawanController::class)->except(['edit', 'update']);
         Route::post('gaji/{penggajian}/hitung', [GajiKaryawanController::class, 'hitung'])->name('gaji.hitung');
         Route::resource('absensi', AbsensiController::class)->only(['index', 'store']);

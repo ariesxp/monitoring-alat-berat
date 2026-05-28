@@ -3,7 +3,7 @@ import { useState } from 'react';
 import {
     LayoutDashboard, Truck, Users, Building2, FileText, ClipboardList,
     CalendarDays, PackagePlus, PackageMinus, Warehouse, Wallet, BarChart3,
-    Menu, X, LogOut, ChevronDown, Bell
+    Menu, X, LogOut, ChevronDown, Bell, Layers
 } from 'lucide-react';
 
 const menuItems = [
@@ -12,6 +12,7 @@ const menuItems = [
     { label: 'Alat Berat', href: '/alat-berat', icon: Truck, roles: ['admin'] },
     { label: 'Operator / Karyawan', href: '/operator', icon: Users, roles: ['admin'] },
     { label: 'Client', href: '/client', icon: FileText, roles: ['admin'] },
+    { label: 'Golongan', href: '/golongan', icon: Layers, roles: ['admin'] },
     { type: 'separator', label: 'Operasional', roles: ['admin', 'supervisor', 'operator'] },
     { label: 'Kontrak Kerja', href: '/kontrak-kerja', icon: FileText, roles: ['admin', 'supervisor'] },
     { label: 'SPK', href: '/spk', icon: ClipboardList, roles: ['admin', 'supervisor'] },
