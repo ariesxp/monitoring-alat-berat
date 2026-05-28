@@ -17,7 +17,7 @@ const JABATAN_OPTIONS = [
 
 const DEPARTEMEN_OPTIONS = ['Head Office', 'Operasional'];
 
-export default function Form({ operator }) {
+export default function Form({ operator, golongans = [] }) {
     const isEdit = !!operator;
     const { data, setData, post, put, processing, errors } = useForm({
         nama: operator?.nama || '',
@@ -29,6 +29,7 @@ export default function Form({ operator }) {
         alamat: operator?.alamat || '',
         jabatan: operator?.jabatan || '',
         departemen: operator?.departemen || '',
+        golongan_id: operator?.golongan_id || '',
         gaji_pokok: operator?.gaji_pokok || '',
         tunjangan: operator?.tunjangan || '0',
         tanggal_masuk: operator?.tanggal_masuk?.split('T')[0] || '',
@@ -36,6 +37,21 @@ export default function Form({ operator }) {
         status_perkawinan: operator?.status_perkawinan || '',
         pendidikan: operator?.pendidikan || '',
     });
+
+    const formatRp = (v) => new Intl.NumberFormat('id-ID').format(v);
+
+    const handleGolonganChange = (golonganId) => {
+        setData((prev) => {
+            const golongan = golongans.find((g) => g.id === Number(golonganId));
+            return {
+                ...prev,
+                golongan_id: golonganId,
+                gaji_pokok: golongan ? golongan.gaji_golongan : prev.gaji_pokok,
+            };
+        });
+    };
+
+    const selectedGolongan = golongans.find((g) => g.id === Number(data.golongan_id));
 
     const submit = (e) => {
         e.preventDefault();
@@ -141,6 +157,16 @@ export default function Form({ operator }) {
                                 {errors.jabatan && <p className="text-red-500 text-xs mt-1">{errors.jabatan}</p>}
                             </div>
                             <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Golongan</label>
+                                <select value={data.golongan_id} onChange={(e) => handleGolonganChange(e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500">
+                                    <option value="">-- Pilih Golongan --</option>
+                                    {golongans.map((g) => (
+                                        <option key={g.id} value={g.id}>{g.kode_golongan} - {g.nama_golongan}</option>
+                                    ))}
+                                </select>
+                                {errors.golongan_id && <p className="text-red-500 text-xs mt-1">{errors.golongan_id}</p>}
+                            </div>
+                            <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">Departemen</label>
                                 <select value={data.departemen} onChange={(e) => setData('departemen', e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500">
                                     <option value="">-- Pilih Departemen --</option>
@@ -157,7 +183,10 @@ export default function Form({ operator }) {
                             </div>
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">Gaji Pokok <span className="text-red-500">*</span></label>
-                                <input type="number" value={data.gaji_pokok} onChange={(e) => setData('gaji_pokok', e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500" />
+                                <input type="number" value={data.gaji_pokok} onChange={(e) => setData('gaji_pokok', e.target.value)} readOnly={!!data.golongan_id} className={`w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 ${data.golongan_id ? 'bg-gray-50 text-gray-500' : ''}`} />
+                                {selectedGolongan && (
+                                    <p className="text-xs text-blue-600 mt-1">Sesuai golongan {selectedGolongan.nama_golongan}: Rp {formatRp(selectedGolongan.gaji_golongan)}</p>
+                                )}
                                 {errors.gaji_pokok && <p className="text-red-500 text-xs mt-1">{errors.gaji_pokok}</p>}
                             </div>
                             <div>

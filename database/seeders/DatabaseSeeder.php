@@ -10,6 +10,7 @@ use App\Models\Operator;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
+use Database\Seeders\GolonganSeeder;
 
 class DatabaseSeeder extends Seeder
 {
@@ -42,6 +43,9 @@ class DatabaseSeeder extends Seeder
             'phone' => '081234567892',
             'email_verified_at' => now(),
         ]);
+
+        // Golongan
+        $this->call(GolonganSeeder::class);
 
         // Alat Berat
         $alatData = [

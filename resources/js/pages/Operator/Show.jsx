@@ -30,6 +30,7 @@ export default function Show({ operator }) {
                 <dl className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                     <Info label="Kode Karyawan" value={operator.kode_karyawan} />
                     <Info label="Jabatan" value={operator.jabatan} />
+                    <Info label="Golongan" value={operator.golongan ? `${operator.golongan.kode_golongan} - ${operator.golongan.nama_golongan}` : '-'} />
                     <Info label="Departemen" value={operator.departemen} />
                     <Info label="Tanggal Masuk" value={operator.tanggal_masuk ? new Date(operator.tanggal_masuk).toLocaleDateString('id-ID') : '-'} />
                     <Info label="Gaji Pokok" value={formatRp(operator.gaji_pokok)} />

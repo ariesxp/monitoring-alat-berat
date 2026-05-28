@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Golongan;
 use App\Models\Operator;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -10,7 +11,7 @@ class OperatorController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Operator::with('user');
+        $query = Operator::with(['user', 'golongan']);
 
         if ($search = $request->get('search')) {
             $query->where(function ($q) use ($search) {
@@ -32,7 +33,9 @@ class OperatorController extends Controller
 
     public function create()
     {
-        return Inertia::render('Operator/Form');
+        return Inertia::render('Operator/Form', [
+            'golongans' => Golongan::orderBy('kode_golongan')->get(),
+        ]);
     }
 
     public function store(Request $request)
@@ -47,6 +50,7 @@ class OperatorController extends Controller
             'alamat' => 'nullable|string',
             'jabatan' => 'required|string|max:100',
             'departemen' => 'nullable|string|max:50',
+            'golongan_id' => 'nullable|exists:golongans,id',
             'gaji_pokok' => 'required|numeric|min:0',
             'tunjangan' => 'nullable|numeric|min:0',
             'tanggal_masuk' => 'required|date',
@@ -54,6 +58,13 @@ class OperatorController extends Controller
             'status_perkawinan' => 'nullable|in:Belum Kawin,Kawin,Cerai Hidup,Cerai Mati',
             'pendidikan' => 'nullable|string|max:50',
         ]);
+
+        if (!empty($validated['golongan_id'])) {
+            $golongan = Golongan::find($validated['golongan_id']);
+            if ($golongan) {
+                $validated['gaji_pokok'] = $golongan->gaji_golongan;
+            }
+        }
 
         $validated['kode_karyawan'] = $this->generateKodeKaryawan($validated['jabatan']);
 
@@ -65,7 +76,7 @@ class OperatorController extends Controller
 
     public function show(Operator $operator)
     {
-        $operator->load(['absensi' => fn ($q) => $q->latest('tanggal')->limit(30), 'detailGaji.penggajian']);
+        $operator->load(['absensi' => fn ($q) => $q->latest('tanggal')->limit(30), 'detailGaji.penggajian', 'golongan']);
 
         return Inertia::render('Operator/Show', [
             'operator' => $operator,
@@ -76,6 +87,7 @@ class OperatorController extends Controller
     {
         return Inertia::render('Operator/Form', [
             'operator' => $operator,
+            'golongans' => Golongan::orderBy('kode_golongan')->get(),
         ]);
     }
 
@@ -91,6 +103,7 @@ class OperatorController extends Controller
             'alamat' => 'nullable|string',
             'jabatan' => 'required|string|max:100',
             'departemen' => 'nullable|string|max:50',
+            'golongan_id' => 'nullable|exists:golongans,id',
             'gaji_pokok' => 'required|numeric|min:0',
             'tunjangan' => 'nullable|numeric|min:0',
             'tanggal_masuk' => 'required|date',
@@ -98,6 +111,13 @@ class OperatorController extends Controller
             'status_perkawinan' => 'nullable|in:Belum Kawin,Kawin,Cerai Hidup,Cerai Mati',
             'pendidikan' => 'nullable|string|max:50',
         ]);
+
+        if (!empty($validated['golongan_id'])) {
+            $golongan = Golongan::find($validated['golongan_id']);
+            if ($golongan) {
+                $validated['gaji_pokok'] = $golongan->gaji_golongan;
+            }
+        }
 
         $operator->update($validated);
 

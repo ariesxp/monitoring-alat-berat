@@ -23,6 +23,7 @@ class Operator extends Model
         'alamat',
         'jabatan',
         'departemen',
+        'golongan_id',
         'gaji_pokok',
         'tunjangan',
         'tanggal_masuk',
@@ -45,6 +46,11 @@ class Operator extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function golongan(): BelongsTo
+    {
+        return $this->belongsTo(Golongan::class);
     }
 
     public function spk(): HasMany

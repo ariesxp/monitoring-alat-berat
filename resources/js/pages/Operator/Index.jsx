@@ -25,6 +25,8 @@ export default function Index({ operators, filters }) {
                                 <th className="text-left py-3 px-4 font-medium text-gray-600">Nama</th>
                                 <th className="text-left py-3 px-4 font-medium text-gray-600">NIK</th>
                                 <th className="text-left py-3 px-4 font-medium text-gray-600">Jabatan</th>
+                                <th className="text-left py-3 px-4 font-medium text-gray-600">Golongan</th>
+                                <th className="text-left py-3 px-4 font-medium text-gray-600">Gaji Pokok</th>
                                 <th className="text-left py-3 px-4 font-medium text-gray-600">No. HP</th>
                                 <th className="text-left py-3 px-4 font-medium text-gray-600">Status</th>
                                 <th className="text-left py-3 px-4 font-medium text-gray-600">Aksi</th>
@@ -36,6 +38,8 @@ export default function Index({ operators, filters }) {
                                     <td className="py-3 px-4 font-medium">{op.nama}</td>
                                     <td className="py-3 px-4 font-mono text-xs">{op.nik}</td>
                                     <td className="py-3 px-4">{op.jabatan}</td>
+                                    <td className="py-3 px-4">{op.golongan ? op.golongan.nama_golongan : '-'}</td>
+                                    <td className="py-3 px-4">Rp {formatRp(op.gaji_pokok)}</td>
                                     <td className="py-3 px-4">{op.no_hp || '-'}</td>
                                     <td className="py-3 px-4">
                                         <span className={`px-2 py-1 rounded-full text-xs font-medium ${op.status === 'aktif' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'}`}>{op.status}</span>
@@ -49,7 +53,7 @@ export default function Index({ operators, filters }) {
                                     </td>
                                 </tr>
                             ))}
-                            {operators.data.length === 0 && <tr><td colSpan={7} className="py-8 text-center text-gray-400">Belum ada data operator</td></tr>}
+                            {operators.data.length === 0 && <tr><td colSpan={9} className="py-8 text-center text-gray-400">Belum ada data operator</td></tr>}
                         </tbody>
                     </table>
                 </div>
