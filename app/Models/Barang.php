@@ -16,12 +16,14 @@ class Barang extends Model
     protected $fillable = [
         'kategori_barang_id',
         'kode_barang',
+        'barcode',
         'nama_barang',
         'satuan',
         'stok_minimum',
         'stok_saat_ini',
         'harga_satuan',
         'lokasi_gudang',
+        'gambar',
     ];
 
     protected function casts(): array

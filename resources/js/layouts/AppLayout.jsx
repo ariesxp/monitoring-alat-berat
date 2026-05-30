@@ -4,7 +4,7 @@ import {
     LayoutDashboard, Truck, Users, Building2, FileText, ClipboardList,
     CalendarDays, PackagePlus, PackageMinus, Warehouse, Wallet, BarChart3,
     Menu, X, LogOut, ChevronDown, Bell, Layers, BookOpen, Receipt,
-    FolderTree, ListTree
+    FolderTree, ListTree, ShoppingCart, Package
 } from 'lucide-react';
 
 const menuItems = [
@@ -19,8 +19,10 @@ const menuItems = [
     { label: 'SPK', href: '/spk', icon: ClipboardList, roles: ['admin', 'supervisor'] },
     { label: 'Laporan Harian', href: '/laporan-harian', icon: CalendarDays, roles: ['admin', 'supervisor', 'operator'] },
     { type: 'separator', label: 'Gudang', roles: ['admin', 'supervisor', 'operator'] },
+    { label: 'Master Barang', href: '/barang', icon: Package, roles: ['admin', 'supervisor', 'operator'] },
     { label: 'Penerimaan Gudang', href: '/penerimaan-gudang', icon: PackagePlus, roles: ['admin', 'supervisor', 'operator'] },
     { label: 'Pengeluaran Gudang', href: '/pengeluaran-gudang', icon: PackageMinus, roles: ['admin', 'supervisor'] },
+    { label: 'Purchase Request', href: '/purchase-request', icon: ShoppingCart, roles: ['admin', 'supervisor', 'operator'] },
     { label: 'Stok Gudang', href: '/stok-gudang', icon: Warehouse, roles: ['admin', 'supervisor', 'operator'] },
     { type: 'separator', label: 'Keuangan', roles: ['admin'] },
     { label: 'Absensi', href: '/absensi', icon: CalendarDays, roles: ['admin'] },

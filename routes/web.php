@@ -15,7 +15,9 @@ use App\Http\Controllers\MainAccountController;
 use App\Http\Controllers\OperatorController;
 use App\Http\Controllers\PenerimaanGudangController;
 use App\Http\Controllers\PengeluaranGudangController;
+use App\Http\Controllers\BarangController;
 use App\Http\Controllers\PettyCashController;
+use App\Http\Controllers\PurchaseRequestController;
 use App\Http\Controllers\SpkController;
 use App\Http\Controllers\StatistikController;
 use App\Http\Controllers\StokGudangController;
@@ -57,6 +59,11 @@ Route::middleware('auth')->group(function () {
         Route::get('statistik', [StatistikController::class, 'index'])->name('statistik.index');
         Route::resource('pengeluaran-gudang', PengeluaranGudangController::class);
     });
+
+    // Gudang - Master Barang & Purchase Request
+    Route::resource('barang', BarangController::class);
+    Route::resource('purchase-request', PurchaseRequestController::class);
+    Route::post('purchase-request/{purchase_request}/approve', [PurchaseRequestController::class, 'approve'])->name('purchase-request.approve');
 
     // All roles
     Route::resource('laporan-harian', LaporanHarianController::class);
