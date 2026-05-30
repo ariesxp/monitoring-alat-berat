@@ -36,7 +36,7 @@ export default function Login() {
                                 </span>
                             </div>
                             <h1 className="text-3xl font-bold text-slate-900">
-                                Selamat Datang Kembali
+                                Selamat Datang
                             </h1>
                             <p className="mt-2 text-slate-600">
                                 Masuk untuk mengakses dashboard Anda
@@ -133,6 +133,10 @@ export default function Login() {
                                     'Masuk'
                                 )}
                             </button>
+
+                            <p className="text-center text-sm text-slate-500 mt-4 tracking-widest font-medium">
+                                Precision · Capacity · Reliability
+                            </p>
                         </form>
                     </div>
                 </div>
@@ -160,6 +164,9 @@ export default function Login() {
                                 </span>
                             ))}
                         </div>
+                        <p className="mt-6 text-sm tracking-widest font-medium opacity-80">
+                            Precision · Capacity · Reliability
+                        </p>
                     </div>
                 </div>
             </div>

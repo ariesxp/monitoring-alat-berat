@@ -57,7 +57,7 @@ export default function Login({ status, canResetPassword, canRegister, botGuard 
                                 </span>
                             </Link>
                             <h1 className="text-3xl font-bold text-slate-900 dark:text-white">
-                                Selamat Datang Kembali
+                                Selamat Datang
                             </h1>
                             <p className="mt-2 text-slate-600 dark:text-slate-400">
                                 Masuk untuk mengakses dashboard Anda
