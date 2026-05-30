@@ -1,13 +1,19 @@
 import { router } from '@inertiajs/react';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Search } from 'lucide-react';
 
 export default function SearchFilter({ route, filters = {}, placeholder = 'Cari...', children }) {
     const [search, setSearch] = useState(filters.search || '');
+    const isFirstRender = useRef(true);
 
     useEffect(() => {
+        if (isFirstRender.current) {
+            isFirstRender.current = false;
+            return;
+        }
+
         const timeout = setTimeout(() => {
-            router.get(route, { ...filters, search: search || undefined }, {
+            router.get(route, { ...filters, search: search || undefined, page: undefined }, {
                 preserveState: true,
                 preserveScroll: true,
                 replace: true,
