@@ -1,0 +1,176 @@
+saya ingin membuat Aplikasi monitoring penggunaan alat berat, dimana fitur dashboard ringkasan bulanan, ada inputan kontrak kerja, penerimaan Gudang, input spk, statistic, stok Gudang, dan gaji karyawan, bisa input lewat WhatsApp. dengan backend laravel, tailwindcss, frontend react, dan database MariaDB
+
+● Berikut panduan deploy ke VPS Ubuntu 24:
+
+  1. Setup Server
+
+  # Update system
+  sudo apt update && sudo apt upgrade -y
+
+  # Install PHP 8.2 + extensions
+  sudo apt install -y software-properties-common
+  sudo add-apt-repository ppa:ondrej/php -y
+  sudo apt install -y php8.2 php8.2-fpm php8.2-mysql php8.2-mbstring php8.2-xml php8.2-bcmath php8.2-curl php8.2-zip php8.2-gd unzip git curl
+
+  # Install MariaDB
+  sudo apt install -y mariadb-server
+  sudo mysql_secure_installation
+  pass : P@55w0rdDB!
+
+  # Install Nginx
+  sudo apt install -y nginx
+
+  # Install Node.js 20 LTS
+  curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+  sudo apt install -y nodejs
+
+  # Install Composer
+  curl -sS https://getcomposer.org/installer | php
+  sudo mv composer.phar /usr/local/bin/composer
+
+  2. Setup Database
+
+  sudo mysql -u root -p
+  CREATE DATABASE monitoring_alat_berat CHARACTER SET utf8mb4 COLLATE
+  utf8mb4_unicode_ci;
+  CREATE USER 'mab_user'@'localhost' IDENTIFIED BY 'm0n1t0r1n9!';
+  GRANT ALL PRIVILEGES ON monitoring_alat_berat.* TO 'mab_user'@'localhost';
+  FLUSH PRIVILEGES;
+  EXIT;
+
+  3. Deploy Aplikasi
+
+  # Clone atau upload project
+  cd /var/www
+  sudo git clone https://github.com/ariesxp/monitoring-alat-berat monitoring-alat-berat
+  # Atau upload via scp:
+  # scp -r C:\monitoring-alat-berat ariesxp@103.55.38.94:/var/www/monitoring-alat-berat
+
+  cd /var/www/monitoring-alat-berat
+  sudo chown -R www-data:www-data .
+  sudo chmod -R 775 storage bootstrap/cache
+
+  # Install dependencies
+  composer install --optimize-autoloader --no-dev
+  npm install
+  npm run build
+
+  # Setup environment
+  cp .env.example .env
+  nano .env
+
+  Edit .env:
+  APP_NAME="Monitoring Alat Berat"
+  APP_ENV=production
+  APP_DEBUG=false
+  APP_URL=https://domain-anda.com
+
+  DB_CONNECTION=mariadb
+  DB_HOST=127.0.0.1
+  DB_PORT=3306
+  DB_DATABASE=monitoring_alat_berat
+  DB_USERNAME=mab_user
+  DB_PASSWORD=password_kuat_anda
+
+  SESSION_DRIVER=database
+  CACHE_STORE=database
+
+  # Generate key & migrate
+  php artisan key:generate
+  php artisan migrate --seed
+  php artisan storage:link
+  php artisan config:cache
+  php artisan route:cache
+  php artisan view:cache
+
+  4. Konfigurasi Nginx
+
+  sudo nano /etc/nginx/sites-available/monitoring-alat-berat
+
+  server {
+      listen 80;
+      server_name domain-anda.com;
+      root /var/www/monitoring-alat-berat/public;
+
+      add_header X-Frame-Options "SAMEORIGIN";
+      add_header X-Content-Type-Options "nosniff";
+
+      index index.php;
+      charset utf-8;
+
+      location / {
+          try_files $uri $uri/ /index.php?$query_string;
+      }
+
+      location = /favicon.ico { access_log off; log_not_found off; }
+      location = /robots.txt  { access_log off; log_not_found off; }
+
+      error_page 404 /index.php;
+
+      location ~ \.php$ {
+          fastcgi_pass unix:/var/run/php/php8.2-fpm.sock;
+          fastcgi_param SCRIPT_FILENAME $realpath_root$fastcgi_script_name;
+          include fastcgi_params;
+      }
+
+      location ~ /\.(?!well-known).* {
+          deny all;
+      }
+
+      client_max_body_size 20M;
+  }
+
+  sudo ln -s /etc/nginx/sites-available/monitoring-alat-berat /etc/nginx/sites-enabled/
+  sudo rm /etc/nginx/sites-enabled/default
+  sudo nginx -t
+  sudo systemctl restart nginx
+
+  5. SSL dengan Certbot (HTTPS)
+
+  sudo apt install -y certbot python3-certbot-nginx
+  sudo certbot --nginx -d monitoring.myhorison.id
+
+  6. Setup Queue Worker (untuk WhatsApp webhook)
+
+  sudo nano /etc/systemd/service/mab-queue.service
+
+  [Unit]
+  Description=MAB Queue Worker
+  After=network.target
+
+  [Service]
+  User=www-data
+  Group=www-data
+  Restart=always
+  RestartSec=5
+  WorkingDirectory=/var/www/monitoring-alat-berat
+  ExecStart=/usr/bin/php artisan queue:work --sleep=3 --tries=3 --max-time=3600
+
+  [Install]
+  WantedBy=multi-user.target
+
+  sudo systemctl enable mab-queue
+  sudo systemctl start mab-queue
+
+  7. Permissions Final
+
+  sudo chown -R www-data:www-data /var/www/monitoring-alat-berat
+  sudo chmod -R 755 /var/www/monitoring-alat-berat
+  sudo chmod -R 775 /var/www/monitoring-alat-berat/storage
+  sudo chmod -R 775 /var/www/monitoring-alat-berat/bootstrap/cache
+
+  Update Deployment (setelah ada perubahan)
+
+  cd /var/www/monitoring-alat-berat
+  git pull origin main
+  composer install --optimize-autoloader --no-dev
+  npm install && npm run build
+  php artisan migrate --force
+  php artisan config:cache
+  php artisan route:cache
+  php artisan view:cache
+  sudo systemctl restart php8.2-fpm
+
+  Setelah deploy, buka http://domain-anda.com dan login dengan
+  admin@monitoring.test / password. Jangan lupa ganti password default di
+  production.

@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AbsensiController;
 use App\Http\Controllers\AccountController;
+use App\Http\Controllers\AuditLogController;
 use App\Http\Controllers\AlatBeratController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\ClientController;
@@ -16,8 +17,12 @@ use App\Http\Controllers\OperatorController;
 use App\Http\Controllers\PenerimaanGudangController;
 use App\Http\Controllers\PengeluaranGudangController;
 use App\Http\Controllers\BarangController;
+use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\PettyCashController;
+use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PurchaseRequestController;
+use App\Http\Controllers\RoleController;
+use App\Http\Controllers\UserController;
 use App\Http\Controllers\SpkController;
 use App\Http\Controllers\StatistikController;
 use App\Http\Controllers\StokGudangController;
@@ -35,6 +40,11 @@ Route::post('/logout', [LoginController::class, 'destroy'])->middleware('auth')-
 Route::middleware('auth')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
+    // Profil pengguna (semua role)
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::put('/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password');
+
     // Admin only
     Route::middleware('role:admin')->group(function () {
         Route::resource('alat-berat', AlatBeratController::class);
@@ -48,6 +58,13 @@ Route::middleware('auth')->group(function () {
         Route::resource('financial-statement-type', FinancialStatementTypeController::class)->except(['show']);
         Route::resource('account', AccountController::class)->except(['show']);
         Route::resource('petty-cash', PettyCashController::class);
+
+        // Manajemen User
+        Route::resource('user', UserController::class)->except(['show']);
+        Route::resource('role', RoleController::class)->except(['show']);
+        Route::resource('permission', PermissionController::class)->except(['show']);
+        Route::get('audit-log', [AuditLogController::class, 'index'])->name('audit-log.index');
+        Route::get('audit-log/{auditLog}', [AuditLogController::class, 'show'])->name('audit-log.show');
     });
 
     // Admin + Supervisor

@@ -11,11 +11,15 @@ use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 use Database\Seeders\GolonganSeeder;
+use Database\Seeders\RolePermissionSeeder;
 
 class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
+        // Roles & Permissions (sebelum user agar role tersedia)
+        $this->call(RolePermissionSeeder::class);
+
         // Users
         User::create([
             'name' => 'Administrator',

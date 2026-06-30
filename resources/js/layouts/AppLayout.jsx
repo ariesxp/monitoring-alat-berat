@@ -4,7 +4,8 @@ import {
     LayoutDashboard, Truck, Users, Building2, FileText, ClipboardList,
     CalendarDays, PackagePlus, PackageMinus, Warehouse, Wallet, BarChart3,
     Menu, X, LogOut, ChevronDown, Bell, Layers, BookOpen, Receipt,
-    FolderTree, ListTree, ShoppingCart, Package
+    FolderTree, ListTree, ShoppingCart, Package, UserCog, ShieldCheck,
+    KeyRound, History
 } from 'lucide-react';
 
 const menuItems = [
@@ -34,6 +35,11 @@ const menuItems = [
     { label: 'Petty Cash', href: '/petty-cash', icon: Receipt, roles: ['admin'] },
     { type: 'separator', label: 'Laporan', roles: ['admin', 'supervisor'] },
     { label: 'Statistik', href: '/statistik', icon: BarChart3, roles: ['admin', 'supervisor'] },
+    { type: 'separator', label: 'Manajemen User', roles: ['admin'] },
+    { label: 'Users', href: '/user', icon: UserCog, roles: ['admin'] },
+    { label: 'Roles', href: '/role', icon: ShieldCheck, roles: ['admin'] },
+    { label: 'Permissions', href: '/permission', icon: KeyRound, roles: ['admin'] },
+    { label: 'Audit Log', href: '/audit-log', icon: History, roles: ['admin'] },
 ];
 
 export default function AppLayout({ children, title }) {
@@ -94,10 +100,14 @@ export default function AppLayout({ children, title }) {
                         {title && <h1 className="text-lg font-semibold text-gray-800">{title}</h1>}
                     </div>
                     <div className="flex items-center gap-3">
-                        <div className="text-right hidden sm:block">
+                        <Link
+                            href="/profile"
+                            className="text-right hidden sm:block px-2 py-1 -mr-1 rounded-lg hover:bg-gray-100 transition-colors"
+                            title="Ubah profil & password"
+                        >
                             <div className="text-sm font-medium text-gray-700">{user.name}</div>
                             <div className="text-xs text-gray-500 capitalize">{user.role}</div>
-                        </div>
+                        </Link>
                         <button
                             onClick={() => router.post('/logout')}
                             className="p-2 rounded-lg hover:bg-gray-100 text-gray-500 hover:text-red-600"
