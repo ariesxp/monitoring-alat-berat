@@ -40,13 +40,13 @@ class KontrakKerjaController extends Controller
             'clients' => Client::orderBy('nama_perusahaan')->get(),
             'alatBerat' => AlatBerat::orderBy('nama_alat')->get(),
             'operators' => Operator::aktif()->orderBy('nama')->get(),
+            'nomorKontrakPreview' => KontrakKerja::previewNomorKontrak(),
         ]);
     }
 
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'nomor_kontrak' => 'required|string|max:50|unique:kontrak_kerja',
             'client_id' => 'required|exists:clients,id',
             'nama_proyek' => 'required|string|max:255',
             'lokasi_proyek' => 'required|string|max:255',
@@ -63,6 +63,8 @@ class KontrakKerjaController extends Controller
         ]);
 
         DB::transaction(function () use ($validated) {
+            $validated['nomor_kontrak'] = KontrakKerja::generateNomorKontrak();
+
             $kontrak = KontrakKerja::create(collect($validated)->except('alat')->toArray());
 
             if (!empty($validated['alat'])) {
@@ -100,7 +102,6 @@ class KontrakKerjaController extends Controller
     public function update(Request $request, KontrakKerja $kontrakKerja)
     {
         $validated = $request->validate([
-            'nomor_kontrak' => 'required|string|max:50|unique:kontrak_kerja,nomor_kontrak,' . $kontrakKerja->id,
             'client_id' => 'required|exists:clients,id',
             'nama_proyek' => 'required|string|max:255',
             'lokasi_proyek' => 'required|string|max:255',

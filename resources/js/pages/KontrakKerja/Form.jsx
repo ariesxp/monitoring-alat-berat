@@ -2,10 +2,10 @@ import AppLayout from '../../layouts/AppLayout';
 import { Head, useForm, Link } from '@inertiajs/react';
 import { Plus, Trash2 } from 'lucide-react';
 
-export default function Form({ kontrak, clients, alatBerat, operators }) {
+export default function Form({ kontrak, clients, alatBerat, operators, nomorKontrakPreview }) {
     const isEdit = !!kontrak;
+    const nomorKontrak = kontrak?.nomor_kontrak || nomorKontrakPreview || '';
     const { data, setData, post, put, processing, errors } = useForm({
-        nomor_kontrak: kontrak?.nomor_kontrak || '',
         client_id: kontrak?.client_id || '',
         nama_proyek: kontrak?.nama_proyek || '',
         lokasi_proyek: kontrak?.lokasi_proyek || '',
@@ -41,9 +41,18 @@ export default function Form({ kontrak, clients, alatBerat, operators }) {
             <form onSubmit={submit} className="space-y-6">
                 <div className="bg-white rounded-xl border border-gray-200 p-6 space-y-4">
                     <h3 className="text-sm font-semibold text-gray-700 border-b pb-2">Informasi Kontrak</h3>
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Nomor Kontrak</label>
+                        <input
+                            type="text"
+                            value={nomorKontrak}
+                            readOnly
+                            className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm bg-gray-50 text-gray-600 cursor-not-allowed font-medium"
+                        />
+                        <p className="text-gray-400 text-xs mt-1">Dibuat otomatis dengan format AOB-yyyymm-nomor urut.</p>
+                    </div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         {[
-                            { label: 'Nomor Kontrak', name: 'nomor_kontrak', required: true },
                             { label: 'Nama Proyek', name: 'nama_proyek', required: true },
                             { label: 'Lokasi Proyek', name: 'lokasi_proyek', required: true },
                             { label: 'Nilai Kontrak (Rp)', name: 'nilai_kontrak', type: 'number', required: true },
