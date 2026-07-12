@@ -1,6 +1,18 @@
 import AppLayout from '../../layouts/AppLayout';
 import { Head, useForm, Link } from '@inertiajs/react';
 
+function Field({ label, name, type = 'text', required, children, data, setData, errors }) {
+    return (
+        <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">{label} {required && <span className="text-red-500">*</span>}</label>
+            {children || (
+                <input type={type} value={data[name]} onChange={(e) => setData(name, e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
+            )}
+            {errors[name] && <p className="text-red-500 text-xs mt-1">{errors[name]}</p>}
+        </div>
+    );
+}
+
 export default function Form({ alatBerat }) {
     const isEdit = !!alatBerat;
     const { data, setData, post, put, processing, errors } = useForm({
@@ -31,16 +43,6 @@ export default function Form({ alatBerat }) {
         }
     };
 
-    const Field = ({ label, name, type = 'text', required, children }) => (
-        <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">{label} {required && <span className="text-red-500">*</span>}</label>
-            {children || (
-                <input type={type} value={data[name]} onChange={(e) => setData(name, e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
-            )}
-            {errors[name] && <p className="text-red-500 text-xs mt-1">{errors[name]}</p>}
-        </div>
-    );
-
     return (
         <AppLayout title={isEdit ? 'Edit Alat Berat' : 'Tambah Alat Berat'}>
             <Head title={isEdit ? 'Edit Alat Berat' : 'Tambah Alat Berat'} />
@@ -48,20 +50,20 @@ export default function Form({ alatBerat }) {
             <div className="max-w-3xl">
                 <form onSubmit={submit} className="bg-white rounded-xl border border-gray-200 p-6 space-y-4">
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <Field label="Kode Alat" name="kode_alat" required />
-                        <Field label="Nama Alat" name="nama_alat" required />
-                        <Field label="Jenis" name="jenis" required />
-                        <Field label="Merk" name="merk" required />
-                        <Field label="Tahun" name="tahun" type="number" />
-                        <Field label="Nomor Seri" name="nomor_seri" />
-                        <Field label="Nomor Polisi" name="nomor_polisi" />
-                        <Field label="No. Mesin" name="no_mesin" />
-                        <Field label="No. Chassis" name="no_chassis" />
-                        <Field label="Dealer" name="dealer" />
-                        <Field label="Harga" name="harga" type="number" />
-                        <Field label="Invoice" name="invoice" />
-                        <Field label="HM Awal" name="hm_awal" type="number" />
-                        <Field label="Status" name="status" required>
+                        <Field data={data} setData={setData} errors={errors} label="Kode Alat" name="kode_alat" required />
+                        <Field data={data} setData={setData} errors={errors} label="Nama Alat" name="nama_alat" required />
+                        <Field data={data} setData={setData} errors={errors} label="Jenis" name="jenis" required />
+                        <Field data={data} setData={setData} errors={errors} label="Merk" name="merk" required />
+                        <Field data={data} setData={setData} errors={errors} label="Tahun" name="tahun" type="number" />
+                        <Field data={data} setData={setData} errors={errors} label="Nomor Seri" name="nomor_seri" />
+                        <Field data={data} setData={setData} errors={errors} label="Nomor Polisi" name="nomor_polisi" />
+                        <Field data={data} setData={setData} errors={errors} label="No. Mesin" name="no_mesin" />
+                        <Field data={data} setData={setData} errors={errors} label="No. Chassis" name="no_chassis" />
+                        <Field data={data} setData={setData} errors={errors} label="Dealer" name="dealer" />
+                        <Field data={data} setData={setData} errors={errors} label="Harga" name="harga" type="number" />
+                        <Field data={data} setData={setData} errors={errors} label="Invoice" name="invoice" />
+                        <Field data={data} setData={setData} errors={errors} label="HM Awal" name="hm_awal" type="number" />
+                        <Field data={data} setData={setData} errors={errors} label="Status" name="status" required>
                             <select value={data.status} onChange={(e) => setData('status', e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm">
                                 <option value="tersedia">Tersedia</option>
                                 <option value="beroperasi">Beroperasi</option>
@@ -70,8 +72,8 @@ export default function Form({ alatBerat }) {
                             </select>
                         </Field>
                     </div>
-                    <Field label="Lokasi Terakhir" name="lokasi_terakhir" />
-                    <Field label="Catatan" name="catatan">
+                    <Field data={data} setData={setData} errors={errors} label="Lokasi Terakhir" name="lokasi_terakhir" />
+                    <Field data={data} setData={setData} errors={errors} label="Catatan" name="catatan">
                         <textarea value={data.catatan} onChange={(e) => setData('catatan', e.target.value)} rows={3} className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" />
                     </Field>
 
