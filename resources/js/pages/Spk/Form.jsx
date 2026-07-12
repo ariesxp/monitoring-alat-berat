@@ -4,6 +4,7 @@ import { Head, useForm, Link } from '@inertiajs/react';
 export default function Form({ spk, kontrak, alatBerat, operators }) {
     const isEdit = !!spk;
     const { data, setData, post, put, processing, errors } = useForm({
+        nomor_spk: spk?.nomor_spk || '',
         kontrak_kerja_id: spk?.kontrak_kerja_id || '',
         alat_berat_id: spk?.alat_berat_id || '',
         operator_id: spk?.operator_id || '',
@@ -26,6 +27,11 @@ export default function Form({ spk, kontrak, alatBerat, operators }) {
             <div className="max-w-2xl">
                 <form onSubmit={submit} className="bg-white rounded-xl border border-gray-200 p-6 space-y-4">
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div className="sm:col-span-2">
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Nomor SPK <span className="text-red-500">*</span></label>
+                            <input type="text" value={data.nomor_spk} onChange={(e) => setData('nomor_spk', e.target.value)} placeholder="Masukkan nomor SPK" className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500" />
+                            {errors.nomor_spk && <p className="text-red-500 text-xs mt-1">{errors.nomor_spk}</p>}
+                        </div>
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">Kontrak Kerja <span className="text-red-500">*</span></label>
                             <select value={data.kontrak_kerja_id} onChange={(e) => setData('kontrak_kerja_id', e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm">

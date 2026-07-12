@@ -6,7 +6,6 @@ use App\Models\AlatBerat;
 use App\Models\KontrakKerja;
 use App\Models\Operator;
 use App\Models\Spk;
-use App\Traits\HasDocumentNumber;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -45,6 +44,7 @@ class SpkController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
+            'nomor_spk' => 'required|string|max:50|unique:spk,nomor_spk',
             'kontrak_kerja_id' => 'required|exists:kontrak_kerja,id',
             'alat_berat_id' => 'required|exists:alat_berat,id',
             'operator_id' => 'required|exists:operators,id',
@@ -56,7 +56,6 @@ class SpkController extends Controller
             'deskripsi' => 'nullable|string',
         ]);
 
-        $validated['nomor_spk'] = Spk::generateNumber('SPK');
         $validated['created_by'] = auth()->id();
 
         Spk::create($validated);
@@ -87,6 +86,7 @@ class SpkController extends Controller
     public function update(Request $request, Spk $spk)
     {
         $validated = $request->validate([
+            'nomor_spk' => 'required|string|max:50|unique:spk,nomor_spk,' . $spk->id,
             'kontrak_kerja_id' => 'required|exists:kontrak_kerja,id',
             'alat_berat_id' => 'required|exists:alat_berat,id',
             'operator_id' => 'required|exists:operators,id',
