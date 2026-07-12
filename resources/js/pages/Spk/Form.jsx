@@ -24,8 +24,9 @@ export default function Form({ spk, kontrak, alatBerat, operators }) {
     return (
         <AppLayout title={isEdit ? 'Edit SPK' : 'Buat SPK'}>
             <Head title={isEdit ? 'Edit SPK' : 'Buat SPK'} />
-            <div className="max-w-2xl">
-                <form onSubmit={submit} className="bg-white rounded-xl border border-gray-200 p-6 space-y-4">
+            <form onSubmit={submit} className="space-y-6">
+                <div className="bg-white rounded-xl border border-gray-200 p-6 space-y-4">
+                    <h3 className="text-sm font-semibold text-gray-700 border-b pb-2">Informasi SPK</h3>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div className="sm:col-span-2">
                             <label className="block text-sm font-medium text-gray-700 mb-1">Nomor SPK <span className="text-red-500">*</span></label>
@@ -74,12 +75,13 @@ export default function Form({ spk, kontrak, alatBerat, operators }) {
                         <label className="block text-sm font-medium text-gray-700 mb-1">Deskripsi</label>
                         <textarea value={data.deskripsi} onChange={(e) => setData('deskripsi', e.target.value)} rows={2} className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" />
                     </div>
-                    <div className="flex gap-3 pt-2">
-                        <button type="submit" disabled={processing} className="px-6 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 disabled:opacity-50">{processing ? 'Menyimpan...' : 'Simpan'}</button>
-                        <Link href="/spk" className="px-6 py-2 bg-gray-100 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-200">Batal</Link>
-                    </div>
-                </form>
-            </div>
+                </div>
+
+                <div className="flex gap-3">
+                    <button type="submit" disabled={processing} className="px-6 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 disabled:opacity-50">{processing ? 'Menyimpan...' : 'Simpan'}</button>
+                    <Link href="/spk" className="px-6 py-2 bg-gray-100 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-200">Batal</Link>
+                </div>
+            </form>
         </AppLayout>
     );
 }
