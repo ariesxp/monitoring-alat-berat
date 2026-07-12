@@ -71,6 +71,7 @@ Route::middleware('auth')->group(function () {
     Route::middleware('role:admin,supervisor')->group(function () {
         Route::resource('kontrak-kerja', KontrakKerjaController::class);
         Route::post('kontrak-kerja/{kontrakKerja}/approve', [KontrakKerjaController::class, 'approve'])->name('kontrak-kerja.approve');
+        Route::patch('kontrak-kerja/{kontrakKerja}/status', [KontrakKerjaController::class, 'updateStatus'])->name('kontrak-kerja.status');
         Route::resource('spk', SpkController::class);
         Route::post('spk/{spk}/approve', [SpkController::class, 'approve'])->name('spk.approve');
         Route::get('statistik', [StatistikController::class, 'index'])->name('statistik.index');

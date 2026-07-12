@@ -151,4 +151,24 @@ class KontrakKerjaController extends Controller
         return redirect()->back()
             ->with('success', 'Kontrak kerja berhasil disetujui.');
     }
+
+    public function updateStatus(Request $request, KontrakKerja $kontrakKerja)
+    {
+        $validated = $request->validate([
+            'status' => 'required|in:draft,aktif,selesai,dibatalkan',
+        ]);
+
+        $data = ['status' => $validated['status']];
+
+        // Catat penyetuju saat kontrak pertama kali diaktifkan.
+        if ($validated['status'] === 'aktif' && !$kontrakKerja->approved_by) {
+            $data['approved_by'] = auth()->id();
+            $data['approved_at'] = now();
+        }
+
+        $kontrakKerja->update($data);
+
+        return redirect()->back()
+            ->with('success', 'Status kontrak kerja berhasil diperbarui.');
+    }
 }
