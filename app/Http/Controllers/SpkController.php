@@ -123,4 +123,24 @@ class SpkController extends Controller
         return redirect()->back()
             ->with('success', 'SPK berhasil disetujui.');
     }
+
+    public function updateStatus(Request $request, Spk $spk)
+    {
+        $validated = $request->validate([
+            'status' => 'required|in:draft,disetujui,berlangsung,selesai,dibatalkan',
+        ]);
+
+        $data = ['status' => $validated['status']];
+
+        // Catat penyetuju saat SPK pertama kali disetujui.
+        if ($validated['status'] === 'disetujui' && !$spk->approved_by) {
+            $data['approved_by'] = auth()->id();
+            $data['approved_at'] = now();
+        }
+
+        $spk->update($data);
+
+        return redirect()->back()
+            ->with('success', 'Status SPK berhasil diperbarui.');
+    }
 }

@@ -74,6 +74,7 @@ Route::middleware('auth')->group(function () {
         Route::patch('kontrak-kerja/{kontrakKerja}/status', [KontrakKerjaController::class, 'updateStatus'])->name('kontrak-kerja.status');
         Route::resource('spk', SpkController::class);
         Route::post('spk/{spk}/approve', [SpkController::class, 'approve'])->name('spk.approve');
+        Route::patch('spk/{spk}/status', [SpkController::class, 'updateStatus'])->name('spk.status');
         Route::get('statistik', [StatistikController::class, 'index'])->name('statistik.index');
         Route::resource('pengeluaran-gudang', PengeluaranGudangController::class);
     });
