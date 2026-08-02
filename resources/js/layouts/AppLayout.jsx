@@ -5,7 +5,8 @@ import {
     CalendarDays, PackagePlus, PackageMinus, Warehouse, Wallet, BarChart3,
     Menu, X, LogOut, ChevronDown, Bell, Layers, BookOpen, Receipt,
     FolderTree, ListTree, ShoppingCart, Package, UserCog, ShieldCheck,
-    KeyRound, History
+    KeyRound, History, PanelLeftClose, PanelLeftOpen,
+    ListChecks, TrendingUp, Scale
 } from 'lucide-react';
 
 const menuItems = [
@@ -33,6 +34,11 @@ const menuItems = [
     { label: 'Financial Statement', href: '/financial-statement-type', icon: ListTree, roles: ['admin'] },
     { label: 'Chart of Account', href: '/account', icon: BookOpen, roles: ['admin'] },
     { label: 'Kas & Bank', href: '/petty-cash', icon: Receipt, roles: ['admin'] },
+    { type: 'separator', label: 'Laporan Keuangan', roles: ['admin'] },
+    { label: 'Neraca Saldo', href: '/neraca-saldo', icon: ListChecks, roles: ['admin'] },
+    { label: 'Laba Rugi', href: '/laba-rugi', icon: TrendingUp, roles: ['admin'] },
+    { label: 'Neraca', href: '/neraca', icon: Building2, roles: ['admin'] },
+    { label: 'Trial Balance', href: '/trial-balance', icon: Scale, roles: ['admin'] },
     { type: 'separator', label: 'Laporan', roles: ['admin', 'supervisor'] },
     { label: 'Statistik', href: '/statistik', icon: BarChart3, roles: ['admin', 'supervisor'] },
     { type: 'separator', label: 'Manajemen User', roles: ['admin'] },
@@ -45,6 +51,14 @@ const menuItems = [
 export default function AppLayout({ children, title }) {
     const { auth, flash } = usePage().props;
     const [sidebarOpen, setSidebarOpen] = useState(false);
+    const [collapsed, setCollapsed] = useState(() =>
+        typeof window !== 'undefined' && localStorage.getItem('sidebarCollapsed') === '1'
+    );
+    const toggleCollapsed = () => setCollapsed((prev) => {
+        const next = !prev;
+        localStorage.setItem('sidebarCollapsed', next ? '1' : '0');
+        return next;
+    });
     const user = auth.user;
     const currentPath = window.location.pathname;
 
@@ -58,7 +72,7 @@ export default function AppLayout({ children, title }) {
             )}
 
             {/* Sidebar */}
-            <aside className={`fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-gray-200 transform transition-transform duration-200 ease-in-out lg:translate-x-0 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+            <aside className={`fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-gray-200 transform transition-transform duration-200 ease-in-out ${collapsed ? 'lg:-translate-x-full' : 'lg:translate-x-0'} ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
                 <div className="flex items-center justify-between h-16 px-4 border-b border-gray-200">
                     <Link href="/dashboard" className="flex items-center gap-2">
                         <img src="/logo-aob.png" alt="Logo AOB" className="w-8 h-8 object-contain" />
@@ -74,7 +88,7 @@ export default function AppLayout({ children, title }) {
                             return <div key={i} className="pt-4 pb-1 px-3 text-xs font-semibold text-gray-400 uppercase tracking-wider">{item.label}</div>;
                         }
                         const Icon = item.icon;
-                        const isActive = currentPath.startsWith(item.href);
+                        const isActive = currentPath === item.href || currentPath.startsWith(item.href + '/');
                         return (
                             <Link
                                 key={i}
@@ -90,12 +104,19 @@ export default function AppLayout({ children, title }) {
             </aside>
 
             {/* Main content */}
-            <div className="lg:pl-64">
+            <div className={`transition-all duration-200 ${collapsed ? 'lg:pl-0' : 'lg:pl-64'}`}>
                 {/* Top bar */}
                 <header className="sticky top-0 z-30 flex items-center justify-between h-16 px-4 bg-white border-b border-gray-200">
                     <div className="flex items-center gap-3">
                         <button onClick={() => setSidebarOpen(true)} className="p-2 rounded-lg hover:bg-gray-100 lg:hidden">
                             <Menu className="w-5 h-5" />
+                        </button>
+                        <button
+                            onClick={toggleCollapsed}
+                            className="hidden lg:inline-flex p-2 rounded-lg hover:bg-gray-100 text-gray-500 hover:text-gray-800"
+                            title={collapsed ? 'Tampilkan sidebar' : 'Sembunyikan sidebar'}
+                        >
+                            {collapsed ? <PanelLeftOpen className="w-5 h-5" /> : <PanelLeftClose className="w-5 h-5" />}
                         </button>
                         {title && <h1 className="text-lg font-semibold text-gray-800">{title}</h1>}
                     </div>

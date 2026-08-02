@@ -7,6 +7,7 @@ use App\Http\Controllers\AlatBeratController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\ClientController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\FinancialReportController;
 use App\Http\Controllers\FinancialStatementTypeController;
 use App\Http\Controllers\GajiKaryawanController;
 use App\Http\Controllers\GolonganController;
@@ -58,6 +59,10 @@ Route::middleware('auth')->group(function () {
         Route::resource('financial-statement-type', FinancialStatementTypeController::class)->except(['show']);
         Route::resource('account', AccountController::class)->except(['show']);
         Route::resource('petty-cash', PettyCashController::class);
+        Route::get('neraca-saldo', [FinancialReportController::class, 'neracaSaldo'])->name('neraca-saldo.index');
+        Route::get('laba-rugi', [FinancialReportController::class, 'labaRugi'])->name('laba-rugi.index');
+        Route::get('neraca', [FinancialReportController::class, 'neraca'])->name('neraca.index');
+        Route::get('trial-balance', [FinancialReportController::class, 'trialBalance'])->name('trial-balance.index');
 
         // Manajemen User
         Route::resource('user', UserController::class)->except(['show']);

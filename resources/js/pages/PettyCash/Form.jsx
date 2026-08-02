@@ -1,6 +1,7 @@
 import AppLayout from '../../layouts/AppLayout';
 import { Head, useForm, Link } from '@inertiajs/react';
 import { Plus, Trash2 } from 'lucide-react';
+import AccountCombobox from '../../components/AccountCombobox';
 
 const emptyDetail = { account_id: '', description: '', remark: '', debit: '0', credit: '0' };
 
@@ -112,12 +113,12 @@ export default function Form({ pettyCash, accounts }) {
                                     <tr key={idx} className="border-t border-gray-100">
                                         <td className="py-2 px-3 text-gray-400 text-xs">{idx + 1}</td>
                                         <td className="py-2 px-3">
-                                            <select value={detail.account_id} onChange={(e) => updateDetail(idx, 'account_id', e.target.value)} className="w-full px-2 py-1.5 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-blue-500">
-                                                <option value="">Pilih Account</option>
-                                                {accounts.map((a) => (
-                                                    <option key={a.id} value={a.id}>{a.account_number} - {a.account_description || '-'}</option>
-                                                ))}
-                                            </select>
+                                            <AccountCombobox
+                                                accounts={accounts}
+                                                value={detail.account_id}
+                                                onChange={(id) => updateDetail(idx, 'account_id', id)}
+                                                error={!!errors[`details.${idx}.account_id`]}
+                                            />
                                             {errors[`details.${idx}.account_id`] && <p className="text-red-500 text-xs mt-0.5">{errors[`details.${idx}.account_id`]}</p>}
                                         </td>
                                         <td className="py-2 px-3">
