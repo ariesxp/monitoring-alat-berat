@@ -12,8 +12,8 @@ export default function Index({ pettyCash, filters, summary }) {
         new Date(date).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' });
 
     return (
-        <AppLayout title="Petty Cash">
-            <Head title="Petty Cash" />
+        <AppLayout title="Kas & Bank">
+            <Head title="Kas & Bank" />
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
                 <div className="bg-white rounded-xl border border-gray-200 p-4">
@@ -95,7 +95,7 @@ export default function Index({ pettyCash, filters, summary }) {
                                 </tr>
                             ))}
                             {pettyCash.data.length === 0 && (
-                                <tr><td colSpan={7} className="py-8 text-center text-gray-400">Belum ada data petty cash</td></tr>
+                                <tr><td colSpan={7} className="py-8 text-center text-gray-400">Belum ada data kas & bank</td></tr>
                             )}
                         </tbody>
                     </table>

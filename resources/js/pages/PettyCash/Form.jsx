@@ -54,8 +54,8 @@ export default function Form({ pettyCash, accounts }) {
     };
 
     return (
-        <AppLayout title={isEdit ? 'Edit Petty Cash' : 'Tambah Petty Cash'}>
-            <Head title={isEdit ? 'Edit Petty Cash' : 'Tambah Petty Cash'} />
+        <AppLayout title={isEdit ? 'Edit Kas & Bank' : 'Tambah Kas & Bank'}>
+            <Head title={isEdit ? 'Edit Kas & Bank' : 'Tambah Kas & Bank'} />
             <form onSubmit={submit} className="space-y-4">
                 {/* Header */}
                 <div className="bg-white rounded-xl border border-gray-200 p-6 space-y-4">

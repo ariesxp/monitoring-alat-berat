@@ -99,7 +99,7 @@ class PettyCashController extends Controller
         });
 
         return redirect()->route('petty-cash.index')
-            ->with('success', 'Petty Cash berhasil ditambahkan.');
+            ->with('success', 'Kas & Bank berhasil ditambahkan.');
     }
 
     public function show(PettyCash $pettyCash)
@@ -166,7 +166,7 @@ class PettyCashController extends Controller
         });
 
         return redirect()->route('petty-cash.index')
-            ->with('success', 'Petty Cash berhasil diperbarui.');
+            ->with('success', 'Kas & Bank berhasil diperbarui.');
     }
 
     public function destroy(PettyCash $pettyCash)
@@ -174,6 +174,6 @@ class PettyCashController extends Controller
         $pettyCash->delete();
 
         return redirect()->route('petty-cash.index')
-            ->with('success', 'Petty Cash berhasil dihapus.');
+            ->with('success', 'Kas & Bank berhasil dihapus.');
     }
 }

@@ -32,7 +32,7 @@ const menuItems = [
     { label: 'Main Account', href: '/main-account', icon: FolderTree, roles: ['admin'] },
     { label: 'Financial Statement', href: '/financial-statement-type', icon: ListTree, roles: ['admin'] },
     { label: 'Chart of Account', href: '/account', icon: BookOpen, roles: ['admin'] },
-    { label: 'Petty Cash', href: '/petty-cash', icon: Receipt, roles: ['admin'] },
+    { label: 'Kas & Bank', href: '/petty-cash', icon: Receipt, roles: ['admin'] },
     { type: 'separator', label: 'Laporan', roles: ['admin', 'supervisor'] },
     { label: 'Statistik', href: '/statistik', icon: BarChart3, roles: ['admin', 'supervisor'] },
     { type: 'separator', label: 'Manajemen User', roles: ['admin'] },

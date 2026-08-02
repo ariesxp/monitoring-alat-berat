@@ -76,7 +76,7 @@ class AccountController extends Controller
 
         if ($account->pettyCashDetails()->exists()) {
             return redirect()->route('account.index')
-                ->with('error', 'Account tidak dapat dihapus karena masih digunakan di Petty Cash.');
+                ->with('error', 'Account tidak dapat dihapus karena masih digunakan di Kas & Bank.');
         }
 
         $account->delete();

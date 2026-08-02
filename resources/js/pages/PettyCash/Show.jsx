@@ -14,8 +14,8 @@ export default function Show({ pettyCash }) {
     const totalCredit = details.reduce((s, d) => s + parseFloat(d.credit || 0), 0);
 
     return (
-        <AppLayout title="Detail Petty Cash">
-            <Head title="Detail Petty Cash" />
+        <AppLayout title="Detail Kas & Bank">
+            <Head title="Detail Kas & Bank" />
             <div className="space-y-4">
                 {/* Actions */}
                 <div className="flex items-center gap-3">
