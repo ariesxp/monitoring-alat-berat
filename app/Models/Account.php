@@ -11,6 +11,8 @@ class Account extends Model
     protected $fillable = [
         'account_number',
         'account_description',
+        'parent_id',
+        'level',
         'main_account_id',
         'account_type',
         'financial_statement_type_id',
@@ -21,7 +23,27 @@ class Account extends Model
     {
         return [
             'is_active' => 'boolean',
+            'level' => 'integer',
         ];
+    }
+
+    public function parent(): BelongsTo
+    {
+        return $this->belongsTo(Account::class, 'parent_id');
+    }
+
+    public function children(): HasMany
+    {
+        return $this->hasMany(Account::class, 'parent_id');
+    }
+
+    /**
+     * Akun "posting level": akun detail/leaf (tidak memiliki sub-account),
+     * yaitu satu-satunya jenjang yang boleh diposting transaksi.
+     */
+    public function scopePostable($query)
+    {
+        return $query->whereDoesntHave('children');
     }
 
     public function mainAccount(): BelongsTo

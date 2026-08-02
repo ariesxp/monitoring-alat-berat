@@ -101,5 +101,8 @@ class DatabaseSeeder extends Seeder
         foreach ($barangData as $brg) {
             Barang::create($brg);
         }
+
+        // Chart of Account berjenjang dari MASTER_COA_AOB.xlsx
+        $this->call(CoaSeeder::class);
     }
 }

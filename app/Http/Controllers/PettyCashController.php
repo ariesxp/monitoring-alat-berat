@@ -51,7 +51,7 @@ class PettyCashController extends Controller
     public function create()
     {
         return Inertia::render('PettyCash/Form', [
-            'accounts' => Account::where('is_active', true)->orderBy('account_number')->get(['id', 'account_number', 'account_description']),
+            'accounts' => Account::postable()->where('is_active', true)->orderBy('account_number')->get(['id', 'account_number', 'account_description']),
         ]);
     }
 
@@ -63,7 +63,11 @@ class PettyCashController extends Controller
             'description' => 'required|string|max:255',
             'remark' => 'nullable|string',
             'details' => 'required|array|min:1',
-            'details.*.account_id' => 'required|exists:accounts,id',
+            'details.*.account_id' => ['required', 'exists:accounts,id', function ($attr, $value, $fail) {
+                if (Account::whereKey($value)->has('children')->exists()) {
+                    $fail('Akun yang dipilih bukan akun posting level (masih memiliki sub-account).');
+                }
+            }],
             'details.*.description' => 'required|string|max:255',
             'details.*.remark' => 'nullable|string',
             'details.*.debit' => 'required|numeric|min:0',
@@ -113,7 +117,7 @@ class PettyCashController extends Controller
 
         return Inertia::render('PettyCash/Form', [
             'pettyCash' => $pettyCash,
-            'accounts' => Account::where('is_active', true)->orderBy('account_number')->get(['id', 'account_number', 'account_description']),
+            'accounts' => Account::postable()->where('is_active', true)->orderBy('account_number')->get(['id', 'account_number', 'account_description']),
         ]);
     }
 
@@ -125,7 +129,11 @@ class PettyCashController extends Controller
             'description' => 'required|string|max:255',
             'remark' => 'nullable|string',
             'details' => 'required|array|min:1',
-            'details.*.account_id' => 'required|exists:accounts,id',
+            'details.*.account_id' => ['required', 'exists:accounts,id', function ($attr, $value, $fail) {
+                if (Account::whereKey($value)->has('children')->exists()) {
+                    $fail('Akun yang dipilih bukan akun posting level (masih memiliki sub-account).');
+                }
+            }],
             'details.*.description' => 'required|string|max:255',
             'details.*.remark' => 'nullable|string',
             'details.*.debit' => 'required|numeric|min:0',
