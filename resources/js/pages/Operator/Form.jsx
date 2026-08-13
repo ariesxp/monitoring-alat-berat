@@ -17,11 +17,12 @@ const JABATAN_OPTIONS = [
 
 const DEPARTEMEN_OPTIONS = ['Head Office', 'Operasional'];
 
-export default function Form({ operator, golongans = [] }) {
+export default function Form({ operator, golongans = [], nikMeta = null }) {
     const isEdit = !!operator;
     const { data, setData, post, put, processing, errors } = useForm({
         nama: operator?.nama || '',
         nik: operator?.nik || '',
+        nik_karyawan: operator?.nik_karyawan || '',
         jenis_kelamin: operator?.jenis_kelamin || '',
         tempat_lahir: operator?.tempat_lahir || '',
         tanggal_lahir: operator?.tanggal_lahir?.split('T')[0] || '',
@@ -52,6 +53,23 @@ export default function Form({ operator, golongans = [] }) {
     };
 
     const selectedGolongan = golongans.find((g) => g.id === Number(data.golongan_id));
+
+    // NIK (Nomor Induk Karyawan) format: yymmaabbbb — otomatis, mengikuti divisi/departemen.
+    const buildNik = (departemen) => {
+        if (!nikMeta) return '';
+        const aa = departemen === 'Head Office' ? '01' : '02';
+        const seq = String(nikMeta.nextSeq[aa] ?? 1).padStart(4, '0');
+        return `${nikMeta.yymm}${aa}${seq}`;
+    };
+
+    const handleDepartemenChange = (departemen) => {
+        setData((prev) => ({
+            ...prev,
+            departemen,
+            // Regenerasi otomatis hanya saat tambah baru; tetap bisa diubah manual.
+            nik_karyawan: !isEdit && departemen ? buildNik(departemen) : prev.nik_karyawan,
+        }));
+    };
 
     const submit = (e) => {
         e.preventDefault();
@@ -147,6 +165,12 @@ export default function Form({ operator, golongans = [] }) {
                         <h3 className="text-sm font-semibold text-gray-800 mb-3 pb-2 border-b border-gray-100">Data Kepegawaian</h3>
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                             <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">NIK (Nomor Induk Karyawan)</label>
+                                <input type="text" value={data.nik_karyawan} onChange={(e) => setData('nik_karyawan', e.target.value)} placeholder="Otomatis setelah pilih departemen" className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm font-mono focus:ring-2 focus:ring-blue-500" />
+                                <p className="text-xs text-gray-400 mt-1">Format: yymmaabbbb (terisi otomatis, bisa diubah)</p>
+                                {errors.nik_karyawan && <p className="text-red-500 text-xs mt-1">{errors.nik_karyawan}</p>}
+                            </div>
+                            <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">Jabatan <span className="text-red-500">*</span></label>
                                 <select value={data.jabatan} onChange={(e) => setData('jabatan', e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500">
                                     <option value="">-- Pilih Jabatan --</option>
@@ -168,7 +192,7 @@ export default function Form({ operator, golongans = [] }) {
                             </div>
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">Departemen</label>
-                                <select value={data.departemen} onChange={(e) => setData('departemen', e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500">
+                                <select value={data.departemen} onChange={(e) => handleDepartemenChange(e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500">
                                     <option value="">-- Pilih Departemen --</option>
                                     {DEPARTEMEN_OPTIONS.map((d) => (
                                         <option key={d} value={d}>{d}</option>

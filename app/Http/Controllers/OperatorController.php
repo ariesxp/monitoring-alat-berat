@@ -35,6 +35,13 @@ class OperatorController extends Controller
     {
         return Inertia::render('Operator/Form', [
             'golongans' => Golongan::orderBy('kode_golongan')->get(),
+            'nikMeta' => [
+                'yymm' => now()->format('ym'),
+                'nextSeq' => [
+                    '01' => $this->nextNikSeq('01'),
+                    '02' => $this->nextNikSeq('02'),
+                ],
+            ],
         ]);
     }
 
@@ -43,6 +50,7 @@ class OperatorController extends Controller
         $validated = $request->validate([
             'nama' => 'required|string|max:255',
             'nik' => 'required|string|max:20|unique:operators',
+            'nik_karyawan' => 'nullable|string|max:20|unique:operators,nik_karyawan',
             'jenis_kelamin' => 'nullable|in:Laki-laki,Perempuan',
             'tempat_lahir' => 'nullable|string|max:100',
             'tanggal_lahir' => 'nullable|date',
@@ -67,6 +75,10 @@ class OperatorController extends Controller
         }
 
         $validated['kode_karyawan'] = $this->generateKodeKaryawan($validated['jabatan']);
+
+        if (empty($validated['nik_karyawan'])) {
+            $validated['nik_karyawan'] = $this->generateNik($validated['departemen'] ?? null);
+        }
 
         Operator::create($validated);
 
@@ -96,6 +108,7 @@ class OperatorController extends Controller
         $validated = $request->validate([
             'nama' => 'required|string|max:255',
             'nik' => 'required|string|max:20|unique:operators,nik,' . $operator->id,
+            'nik_karyawan' => 'nullable|string|max:20|unique:operators,nik_karyawan,' . $operator->id,
             'jenis_kelamin' => 'nullable|in:Laki-laki,Perempuan',
             'tempat_lahir' => 'nullable|string|max:100',
             'tanggal_lahir' => 'nullable|date',
@@ -160,5 +173,38 @@ class OperatorController extends Controller
         $seq = $last ? ((int) substr($last, -3)) + 1 : 1;
 
         return sprintf('%s-%s-%03d', $kode, $bulanTahun, $seq);
+    }
+
+    private function divisionCode(?string $departemen): string
+    {
+        // Head Office = 01, Operasional (dan lainnya) = 02
+        return $departemen === 'Head Office' ? '01' : '02';
+    }
+
+    private function nextNikSeq(string $aa): int
+    {
+        $niks = Operator::withTrashed()
+            ->whereNotNull('nik_karyawan')
+            ->pluck('nik_karyawan');
+
+        $maxSeq = 0;
+        foreach ($niks as $n) {
+            if (strlen($n) === 10 && substr($n, 4, 2) === $aa) {
+                $seq = (int) substr($n, 6, 4);
+                if ($seq > $maxSeq) {
+                    $maxSeq = $seq;
+                }
+            }
+        }
+
+        return $maxSeq + 1;
+    }
+
+    private function generateNik(?string $departemen): string
+    {
+        // Format: yymmaabbbb (tahun 2 digit + bulan 2 digit + kode divisi + nomor urut)
+        $aa = $this->divisionCode($departemen);
+
+        return sprintf('%s%s%04d', now()->format('ym'), $aa, $this->nextNikSeq($aa));
     }
 }

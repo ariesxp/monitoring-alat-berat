@@ -29,6 +29,7 @@ export default function Show({ operator }) {
                 <h3 className="text-sm font-semibold text-gray-800 mb-3 pb-2 border-b border-gray-100">Data Kepegawaian</h3>
                 <dl className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                     <Info label="Kode Karyawan" value={operator.kode_karyawan} />
+                    <Info label="NIK (Nomor Induk Karyawan)" value={operator.nik_karyawan} />
                     <Info label="Jabatan" value={operator.jabatan} />
                     <Info label="Golongan" value={operator.golongan ? `${operator.golongan.kode_golongan} - ${operator.golongan.nama_golongan}` : '-'} />
                     <Info label="Departemen" value={operator.departemen} />
