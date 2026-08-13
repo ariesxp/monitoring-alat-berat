@@ -26,7 +26,7 @@ class OperatorController extends Controller
         }
 
         return Inertia::render('Operator/Index', [
-            'operators' => $query->orderByDesc('created_at')->paginate(10)->withQueryString(),
+            'operators' => $query->orderBy('nik_karyawan')->paginate(10)->withQueryString(),
             'filters' => $request->only(['search', 'status']),
         ]);
     }

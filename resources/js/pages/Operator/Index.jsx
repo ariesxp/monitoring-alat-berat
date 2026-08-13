@@ -20,8 +20,8 @@ export default function Index({ operators, filters }) {
                     <table className="w-full text-sm">
                         <thead className="bg-gray-50">
                             <tr>
-                                <th className="text-left py-3 px-4 font-medium text-gray-600">Nama</th>
                                 <th className="text-left py-3 px-4 font-medium text-gray-600">NIK</th>
+                                <th className="text-left py-3 px-4 font-medium text-gray-600">Nama</th>
                                 <th className="text-left py-3 px-4 font-medium text-gray-600">No. KTP</th>
                                 <th className="text-left py-3 px-4 font-medium text-gray-600">Jabatan</th>
                                 <th className="text-left py-3 px-4 font-medium text-gray-600">Golongan</th>
@@ -33,8 +33,8 @@ export default function Index({ operators, filters }) {
                         <tbody>
                             {operators.data.map((op) => (
                                 <tr key={op.id} className="border-t border-gray-100 hover:bg-gray-50">
-                                    <td className="py-3 px-4 font-medium">{op.nama}</td>
                                     <td className="py-3 px-4 font-mono text-xs">{op.nik_karyawan || '-'}</td>
+                                    <td className="py-3 px-4 font-medium">{op.nama}</td>
                                     <td className="py-3 px-4 font-mono text-xs">{op.nik}</td>
                                     <td className="py-3 px-4">{op.jabatan}</td>
                                     <td className="py-3 px-4">{op.golongan ? op.golongan.nama_golongan : '-'}</td>
