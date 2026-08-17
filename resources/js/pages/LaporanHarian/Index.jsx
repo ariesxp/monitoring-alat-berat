@@ -31,13 +31,13 @@ export default function Index({ laporan, filters }) {
                             {laporan.data.map((l) => (
                                 <tr key={l.id} className="border-t border-gray-100 hover:bg-gray-50">
                                     <td className="py-3 px-4">{new Date(l.tanggal).toLocaleDateString('id-ID')}</td>
-                                    <td className="py-3 px-4 font-mono text-xs">{l.spk?.nomor_spk}</td>
+                                    <td className="py-3 px-4 font-mono text-xs">{l.spk?.nomor_spk || '-'}</td>
                                     <td className="py-3 px-4">{l.alat_berat?.nama_alat}</td>
                                     <td className="py-3 px-4">{l.operator?.nama}</td>
                                     <td className="py-3 px-4">{l.jam_kerja} jam</td>
                                     <td className="py-3 px-4">{l.bbm_liter} ltr</td>
                                     <td className="py-3 px-4"><span className={`px-2 py-1 rounded-full text-xs ${l.kondisi_alat === 'baik' ? 'bg-green-100 text-green-700' : l.kondisi_alat === 'rusak' ? 'bg-red-100 text-red-700' : 'bg-yellow-100 text-yellow-700'}`}>{l.kondisi_alat}</span></td>
-                                    <td className="py-3 px-4"><span className={`text-xs ${l.sumber_input === 'whatsapp' ? 'text-green-600' : 'text-gray-500'}`}>{l.sumber_input}</span></td>
+                                    <td className="py-3 px-4"><span className={`px-2 py-1 rounded-full text-xs font-medium ${l.sumber_input === 'whatsapp' ? 'bg-green-100 text-green-700' : l.sumber_input === 'android' ? 'bg-orange-100 text-orange-700' : 'bg-gray-100 text-gray-600'}`}>{l.sumber_input === 'android' ? 'Android' : l.sumber_input === 'whatsapp' ? 'WhatsApp' : 'Web'}</span></td>
                                     <td className="py-3 px-4"><Link href={`/laporan-harian/${l.id}`} className="p-1.5 rounded hover:bg-blue-50 text-blue-600"><Eye className="w-4 h-4" /></Link></td>
                                 </tr>
                             ))}
