@@ -1,5 +1,5 @@
 import AppLayout from '../../layouts/AppLayout';
-import { Head, useForm, Link } from '@inertiajs/react';
+import { Head, useForm, Link, router } from '@inertiajs/react';
 
 export default function Form({ laporan, spkList }) {
     const isEdit = !!laporan;
@@ -18,13 +18,20 @@ export default function Form({ laporan, spkList }) {
         satuan_volume: laporan?.satuan_volume || '',
         kondisi_alat: laporan?.kondisi_alat || 'baik',
         catatan: laporan?.catatan || '',
+        foto_awal: null,
+        foto_akhir: null,
     });
 
     const selectedSpk = spkList?.find(s => s.id == data.spk_id);
 
     const submit = (e) => {
         e.preventDefault();
-        isEdit ? put(`/laporan-harian/${laporan.id}`) : post('/laporan-harian');
+        if (isEdit) {
+            // Inertia PUT + file upload perlu method spoofing lewat POST.
+            router.post(`/laporan-harian/${laporan.id}`, { ...data, _method: 'put' }, { forceFormData: true });
+        } else {
+            post('/laporan-harian', { forceFormData: true });
+        }
     };
 
     return (
@@ -71,6 +78,20 @@ export default function Form({ laporan, spkList }) {
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">Catatan</label>
                         <textarea value={data.catatan} onChange={(e) => setData('catatan', e.target.value)} rows={2} className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" />
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Foto Awal</label>
+                            <input type="file" accept="image/*" onChange={(e) => setData('foto_awal', e.target.files[0])} className="w-full text-sm text-gray-600 file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100" />
+                            {laporan?.foto_awal && <p className="text-xs text-gray-400 mt-1">Foto awal sudah ada — pilih file baru untuk mengganti.</p>}
+                            {errors.foto_awal && <p className="text-red-500 text-xs mt-1">{errors.foto_awal}</p>}
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Foto Akhir</label>
+                            <input type="file" accept="image/*" onChange={(e) => setData('foto_akhir', e.target.files[0])} className="w-full text-sm text-gray-600 file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100" />
+                            {laporan?.foto_akhir && <p className="text-xs text-gray-400 mt-1">Foto akhir sudah ada — pilih file baru untuk mengganti.</p>}
+                            {errors.foto_akhir && <p className="text-red-500 text-xs mt-1">{errors.foto_akhir}</p>}
+                        </div>
                     </div>
                     <div className="flex gap-3 pt-2">
                         <button type="submit" disabled={processing} className="px-6 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 disabled:opacity-50">{processing ? 'Menyimpan...' : 'Simpan'}</button>

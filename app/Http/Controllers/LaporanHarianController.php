@@ -53,12 +53,21 @@ class LaporanHarianController extends Controller
             'satuan_volume' => 'nullable|string|max:50',
             'kondisi_alat' => 'required|in:baik,kurang_baik,rusak',
             'catatan' => 'nullable|string',
+            'foto_awal' => 'nullable|image|max:5120',
+            'foto_akhir' => 'nullable|image|max:5120',
         ]);
 
         $spk = Spk::findOrFail($validated['spk_id']);
         $validated['alat_berat_id'] = $spk->alat_berat_id;
         $validated['operator_id'] = $spk->operator_id;
         $validated['created_by'] = auth()->id();
+
+        if ($request->hasFile('foto_awal')) {
+            $validated['foto_awal'] = $request->file('foto_awal')->store('laporan-harian', 'public');
+        }
+        if ($request->hasFile('foto_akhir')) {
+            $validated['foto_akhir'] = $request->file('foto_akhir')->store('laporan-harian', 'public');
+        }
 
         $start = strtotime($validated['jam_mulai']);
         $end = strtotime($validated['jam_selesai']);
@@ -106,11 +115,24 @@ class LaporanHarianController extends Controller
             'satuan_volume' => 'nullable|string|max:50',
             'kondisi_alat' => 'required|in:baik,kurang_baik,rusak',
             'catatan' => 'nullable|string',
+            'foto_awal' => 'nullable|image|max:5120',
+            'foto_akhir' => 'nullable|image|max:5120',
         ]);
 
         $spk = Spk::findOrFail($validated['spk_id']);
         $validated['alat_berat_id'] = $spk->alat_berat_id;
         $validated['operator_id'] = $spk->operator_id;
+
+        if ($request->hasFile('foto_awal')) {
+            $validated['foto_awal'] = $request->file('foto_awal')->store('laporan-harian', 'public');
+        } else {
+            unset($validated['foto_awal']);
+        }
+        if ($request->hasFile('foto_akhir')) {
+            $validated['foto_akhir'] = $request->file('foto_akhir')->store('laporan-harian', 'public');
+        } else {
+            unset($validated['foto_akhir']);
+        }
 
         $start = strtotime($validated['jam_mulai']);
         $end = strtotime($validated['jam_selesai']);

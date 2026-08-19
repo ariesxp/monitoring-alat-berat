@@ -46,7 +46,11 @@ export default function Show({ laporan }) {
             ? 'bg-red-100 text-red-700'
             : 'bg-yellow-100 text-yellow-700';
 
-    const fotoUrl = laporan.foto ? (laporan.foto.startsWith('http') ? laporan.foto : `/storage/${laporan.foto}`) : null;
+    const resolveFoto = (f) => (f ? (f.startsWith('http') ? f : `/storage/${f}`) : null);
+    const fotoAwalUrl = resolveFoto(laporan.foto_awal);
+    const fotoAkhirUrl = resolveFoto(laporan.foto_akhir);
+    const fotoUrl = resolveFoto(laporan.foto);
+    const adaFoto = fotoAwalUrl || fotoAkhirUrl || fotoUrl;
 
     return (
         <AppLayout title="Detail Laporan Harian">
@@ -129,10 +133,37 @@ export default function Show({ laporan }) {
                 </div>
             )}
 
-            {fotoUrl && (
+            {adaFoto && (
                 <div className="bg-white rounded-xl border border-gray-200 p-5 mt-4">
                     <h3 className="text-sm font-semibold text-gray-700 mb-3">Foto Bukti</h3>
-                    <img src={fotoUrl} alt="Foto laporan" className="max-h-80 rounded-lg border border-gray-200" />
+                    {(fotoAwalUrl || fotoAkhirUrl) ? (
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <p className="text-xs text-gray-500 mb-2">Foto Awal</p>
+                                {fotoAwalUrl ? (
+                                    <a href={fotoAwalUrl} target="_blank" rel="noreferrer">
+                                        <img src={fotoAwalUrl} alt="Foto awal" className="w-full h-64 object-cover rounded-lg border border-gray-200 hover:opacity-90" />
+                                    </a>
+                                ) : (
+                                    <div className="w-full h-64 rounded-lg border border-dashed border-gray-200 flex items-center justify-center text-xs text-gray-400">Belum ada foto</div>
+                                )}
+                            </div>
+                            <div>
+                                <p className="text-xs text-gray-500 mb-2">Foto Akhir</p>
+                                {fotoAkhirUrl ? (
+                                    <a href={fotoAkhirUrl} target="_blank" rel="noreferrer">
+                                        <img src={fotoAkhirUrl} alt="Foto akhir" className="w-full h-64 object-cover rounded-lg border border-gray-200 hover:opacity-90" />
+                                    </a>
+                                ) : (
+                                    <div className="w-full h-64 rounded-lg border border-dashed border-gray-200 flex items-center justify-center text-xs text-gray-400">Belum ada foto</div>
+                                )}
+                            </div>
+                        </div>
+                    ) : (
+                        <a href={fotoUrl} target="_blank" rel="noreferrer">
+                            <img src={fotoUrl} alt="Foto laporan" className="max-h-80 rounded-lg border border-gray-200 hover:opacity-90" />
+                        </a>
+                    )}
                 </div>
             )}
         </AppLayout>

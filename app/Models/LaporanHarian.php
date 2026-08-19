@@ -28,6 +28,8 @@ class LaporanHarian extends Model
         'kondisi_alat',
         'catatan',
         'foto',
+        'foto_awal',
+        'foto_akhir',
         'sumber_input',
         'created_by',
     ];
