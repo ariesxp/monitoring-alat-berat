@@ -21,6 +21,7 @@ export default function Form({ alatBerat }) {
         jenis: alatBerat?.jenis || '',
         merk: alatBerat?.merk || '',
         tahun: alatBerat?.tahun || '',
+        status_kepemilikan: alatBerat?.status_kepemilikan || 'milik',
         nomor_seri: alatBerat?.nomor_seri || '',
         nomor_polisi: alatBerat?.nomor_polisi || '',
         no_mesin: alatBerat?.no_mesin || '',
@@ -29,6 +30,7 @@ export default function Form({ alatBerat }) {
         harga: alatBerat?.harga || '',
         invoice: alatBerat?.invoice || '',
         hm_awal: alatBerat?.hm_awal || '',
+        hm_sewa_awal: alatBerat?.hm_sewa_awal || '',
         status: alatBerat?.status || 'tersedia',
         lokasi_terakhir: alatBerat?.lokasi_terakhir || '',
         catatan: alatBerat?.catatan || '',
@@ -55,6 +57,12 @@ export default function Form({ alatBerat }) {
                         <Field data={data} setData={setData} errors={errors} label="Jenis" name="jenis" required />
                         <Field data={data} setData={setData} errors={errors} label="Merk" name="merk" required />
                         <Field data={data} setData={setData} errors={errors} label="Tahun" name="tahun" type="number" />
+                        <Field data={data} setData={setData} errors={errors} label="Status Kepemilikan" name="status_kepemilikan" required>
+                            <select value={data.status_kepemilikan} onChange={(e) => setData('status_kepemilikan', e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm">
+                                <option value="milik">Milik</option>
+                                <option value="sewa">Sewa</option>
+                            </select>
+                        </Field>
                         <Field data={data} setData={setData} errors={errors} label="Nomor Seri" name="nomor_seri" />
                         <Field data={data} setData={setData} errors={errors} label="Nomor Polisi" name="nomor_polisi" />
                         <Field data={data} setData={setData} errors={errors} label="No. Mesin" name="no_mesin" />
@@ -63,6 +71,9 @@ export default function Form({ alatBerat }) {
                         <Field data={data} setData={setData} errors={errors} label="Harga" name="harga" type="number" />
                         <Field data={data} setData={setData} errors={errors} label="Invoice" name="invoice" />
                         <Field data={data} setData={setData} errors={errors} label="HM Awal" name="hm_awal" type="number" />
+                        {data.status_kepemilikan === 'sewa' && (
+                            <Field data={data} setData={setData} errors={errors} label="HM Saat Sewa Awal" name="hm_sewa_awal" type="number" />
+                        )}
                         <Field data={data} setData={setData} errors={errors} label="Status" name="status" required>
                             <select value={data.status} onChange={(e) => setData('status', e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm">
                                 <option value="tersedia">Tersedia</option>

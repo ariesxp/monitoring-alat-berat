@@ -53,6 +53,7 @@ export default function Index({ alatBerat, filters }) {
                                 <th className="text-left py-3 px-4 font-medium text-gray-600">Jenis</th>
                                 <th className="text-left py-3 px-4 font-medium text-gray-600">Merk</th>
                                 <th className="text-left py-3 px-4 font-medium text-gray-600">Tahun</th>
+                                <th className="text-left py-3 px-4 font-medium text-gray-600">Kepemilikan</th>
                                 <th className="text-left py-3 px-4 font-medium text-gray-600">Status</th>
                                 <th className="text-left py-3 px-4 font-medium text-gray-600">Aksi</th>
                             </tr>
@@ -65,6 +66,11 @@ export default function Index({ alatBerat, filters }) {
                                     <td className="py-3 px-4">{alat.jenis}</td>
                                     <td className="py-3 px-4">{alat.merk}</td>
                                     <td className="py-3 px-4">{alat.tahun || '-'}</td>
+                                    <td className="py-3 px-4">
+                                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${alat.status_kepemilikan === 'sewa' ? 'bg-purple-100 text-purple-700' : 'bg-gray-100 text-gray-700'}`}>
+                                            {alat.status_kepemilikan === 'sewa' ? 'Sewa' : 'Milik'}
+                                        </span>
+                                    </td>
                                     <td className="py-3 px-4">
                                         <span className={`px-2 py-1 rounded-full text-xs font-medium ${statusColors[alat.status]}`}>
                                             {alat.status}
@@ -80,7 +86,7 @@ export default function Index({ alatBerat, filters }) {
                                 </tr>
                             ))}
                             {alatBerat.data.length === 0 && (
-                                <tr><td colSpan={7} className="py-8 text-center text-gray-400">Belum ada data alat berat</td></tr>
+                                <tr><td colSpan={8} className="py-8 text-center text-gray-400">Belum ada data alat berat</td></tr>
                             )}
                         </tbody>
                     </table>

@@ -26,6 +26,7 @@ export default function Show({ alatBerat }) {
                     <Info label="Jenis" value={alatBerat.jenis} />
                     <Info label="Merk" value={alatBerat.merk} />
                     <Info label="Tahun" value={alatBerat.tahun} />
+                    <Info label="Status Kepemilikan" value={alatBerat.status_kepemilikan === 'sewa' ? 'Sewa' : 'Milik'} />
                     <Info label="Nomor Seri" value={alatBerat.nomor_seri} />
                     <Info label="Nomor Polisi" value={alatBerat.nomor_polisi} />
                     <Info label="No. Mesin" value={alatBerat.no_mesin} />
@@ -34,6 +35,9 @@ export default function Show({ alatBerat }) {
                     <Info label="Harga" value={alatBerat.harga ? new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(alatBerat.harga) : null} />
                     <Info label="Invoice" value={alatBerat.invoice} />
                     <Info label="HM Awal" value={alatBerat.hm_awal ? `${alatBerat.hm_awal} jam` : null} />
+                    {alatBerat.status_kepemilikan === 'sewa' && (
+                        <Info label="HM Saat Sewa Awal" value={alatBerat.hm_sewa_awal ? `${alatBerat.hm_sewa_awal} jam` : null} />
+                    )}
                     <Info label="Status" value={alatBerat.status} />
                     <Info label="Lokasi Terakhir" value={alatBerat.lokasi_terakhir} />
                 </dl>

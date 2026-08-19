@@ -18,6 +18,7 @@ class AlatBerat extends Model
         'jenis',
         'merk',
         'tahun',
+        'status_kepemilikan',
         'nomor_seri',
         'nomor_polisi',
         'no_mesin',
@@ -26,6 +27,7 @@ class AlatBerat extends Model
         'harga',
         'invoice',
         'hm_awal',
+        'hm_sewa_awal',
         'status',
         'lokasi_terakhir',
         'foto',
@@ -37,6 +39,7 @@ class AlatBerat extends Model
         return [
             'harga' => 'decimal:2',
             'hm_awal' => 'decimal:2',
+            'hm_sewa_awal' => 'decimal:2',
         ];
     }
 
