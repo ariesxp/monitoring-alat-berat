@@ -20,6 +20,9 @@ class PengeluaranGudang extends Model
         'spk_id',
         'alat_berat_id',
         'tujuan',
+        'sumber_input',
+        'jenis_pengeluaran',
+        'foto',
         'catatan',
         'created_by',
     ];
