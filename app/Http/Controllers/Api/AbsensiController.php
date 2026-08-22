@@ -21,13 +21,15 @@ class AbsensiController extends Controller
     {
         $operator = $this->operatorOf($request);
         $office = Geo::officeConfig();
+        $offices = Geo::offices();
         $today = Absensi::where('operator_id', $operator->id)
             ->whereDate('tanggal', now()->toDateString())
             ->first();
 
         return response()->json([
             'operator' => $this->operatorPayload($operator),
-            'office'   => $office,
+            'offices'  => $offices,           // multi-office: daftar semua kantor aktif
+            'office'   => $office,             // kompatibilitas format lama (satu kantor)
             'today'    => $today ? $this->transform($today) : null,
             'sudah_masuk'  => (bool) ($today?->jam_masuk),
             'sudah_pulang' => (bool) ($today?->jam_pulang),
@@ -43,23 +45,24 @@ class AbsensiController extends Controller
         $data = $request->validate([
             'latitude'  => 'required|numeric|between:-90,90',
             'longitude' => 'required|numeric|between:-180,180',
+            'office_id' => 'nullable|integer',
             'foto'      => 'required|image|max:5120',
             'keterangan' => 'nullable|string|max:255',
         ]);
 
         $operator = $this->operatorOf($request);
-        $office = Geo::officeConfig();
 
-        $jarak = (int) round(Geo::distanceMeters(
-            (float) $data['latitude'], (float) $data['longitude'],
-            $office['lat'], $office['lng']
-        ));
-
-        if ($jarak > $office['radius_m']) {
+        // Validasi radius terhadap SEMUA kantor: pilih yang terdekat & masih
+        // di dalam radiusnya. office_id dari aplikasi hanya petunjuk; server
+        // tetap memverifikasi sendiri berdasarkan koordinat.
+        $near = Geo::nearestOfficeInRadius((float) $data['latitude'], (float) $data['longitude']);
+        if ($near === null) {
             throw ValidationException::withMessages([
-                'latitude' => ["Anda di luar radius kantor. Jarak Anda {$jarak} m, maksimal {$office['radius_m']} m."],
+                'latitude' => ['Anda berada di luar radius kantor manapun.'],
             ]);
         }
+        $office = $near['office'];
+        $jarak = $near['jarak'];
 
         $existing = Absensi::where('operator_id', $operator->id)
             ->whereDate('tanggal', now()->toDateString())
@@ -80,6 +83,7 @@ class AbsensiController extends Controller
                 'status'       => 'hadir',
                 'metode'       => 'GPS',
                 'lokasi'       => $office['nama'],
+                'office_id'    => $office['id'],
                 'foto_masuk'   => $path,
                 'lat_masuk'    => $data['latitude'],
                 'lng_masuk'    => $data['longitude'],
@@ -90,7 +94,7 @@ class AbsensiController extends Controller
         );
 
         return response()->json([
-            'message' => 'Absen masuk berhasil dicatat.',
+            'message' => "Absen masuk berhasil dicatat di {$office['nama']}.",
             'data'    => $this->transform($absensi->fresh('operator')),
         ], 201);
     }
@@ -103,22 +107,20 @@ class AbsensiController extends Controller
         $data = $request->validate([
             'latitude'  => 'required|numeric|between:-90,90',
             'longitude' => 'required|numeric|between:-180,180',
+            'office_id' => 'nullable|integer',
             'foto'      => 'required|image|max:5120',
         ]);
 
         $operator = $this->operatorOf($request);
-        $office = Geo::officeConfig();
 
-        $jarak = (int) round(Geo::distanceMeters(
-            (float) $data['latitude'], (float) $data['longitude'],
-            $office['lat'], $office['lng']
-        ));
-
-        if ($jarak > $office['radius_m']) {
+        $near = Geo::nearestOfficeInRadius((float) $data['latitude'], (float) $data['longitude']);
+        if ($near === null) {
             throw ValidationException::withMessages([
-                'latitude' => ["Anda di luar radius kantor. Jarak Anda {$jarak} m, maksimal {$office['radius_m']} m."],
+                'latitude' => ['Anda berada di luar radius kantor manapun.'],
             ]);
         }
+        $office = $near['office'];
+        $jarak = $near['jarak'];
 
         $absensi = Absensi::where('operator_id', $operator->id)
             ->whereDate('tanggal', now()->toDateString())
@@ -147,7 +149,7 @@ class AbsensiController extends Controller
         ]);
 
         return response()->json([
-            'message' => 'Absen pulang berhasil dicatat.',
+            'message' => "Absen pulang berhasil dicatat di {$office['nama']}.",
             'data'    => $this->transform($absensi->fresh('operator')),
         ]);
     }

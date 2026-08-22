@@ -2,7 +2,9 @@
 
 namespace App\Support;
 
+use App\Models\Office;
 use App\Models\Setting;
+use Illuminate\Support\Collection;
 
 class Geo
 {
@@ -22,6 +24,66 @@ class Geo
         $c = 2 * atan2(sqrt($a), sqrt(1 - $a));
 
         return $earth * $c;
+    }
+
+    /**
+     * Daftar kantor aktif untuk absensi (multi-office).
+     *
+     * Jika tabel offices belum diisi, fallback ke satu kantor dari settings
+     * agar tetap kompatibel dengan konfigurasi lama.
+     *
+     * @return Collection<int, array{id:?int,nama:string,lat:float,lng:float,radius_m:int}>
+     */
+    public static function offices(): Collection
+    {
+        $rows = Office::query()->where('aktif', true)->orderBy('id')->get();
+
+        if ($rows->isNotEmpty()) {
+            return $rows->map(fn (Office $o) => [
+                'id'       => $o->id,
+                'nama'     => $o->nama,
+                'lat'      => (float) $o->lat,
+                'lng'      => (float) $o->lng,
+                'radius_m' => (int) $o->radius_m,
+            ])->values();
+        }
+
+        // Fallback: satu kantor dari settings (format lama).
+        $c = self::officeConfig();
+        return collect([[
+            'id'       => null,
+            'nama'     => $c['nama'],
+            'lat'      => $c['lat'],
+            'lng'      => $c['lng'],
+            'radius_m' => $c['radius_m'],
+        ]]);
+    }
+
+    /**
+     * Cari kantor terdekat yang MASIH berada dalam radiusnya dari titik
+     * [$lat, $lng]. Mengembalikan array kantor + jarak (m), atau null bila
+     * berada di luar radius semua kantor.
+     *
+     * @return array{office:array,jarak:int}|null
+     */
+    public static function nearestOfficeInRadius(float $lat, float $lng): ?array
+    {
+        $best = null;
+        $bestDist = INF;
+
+        foreach (self::offices() as $office) {
+            $d = self::distanceMeters($lat, $lng, $office['lat'], $office['lng']);
+            if ($d <= $office['radius_m'] && $d < $bestDist) {
+                $best = $office;
+                $bestDist = $d;
+            }
+        }
+
+        if ($best === null) {
+            return null;
+        }
+
+        return ['office' => $best, 'jarak' => (int) round($bestDist)];
     }
 
     /**

@@ -37,6 +37,9 @@ class AbsensiSeeder extends Seeder
             Setting::set($k, $v);
         }
 
+        // 1b) Lokasi kantor multi-office (Jakarta, Merauke, Ambon).
+        $this->call(OfficeSeeder::class);
+
         // 2) Supervisor (pengguna aplikasi supervisi).
         $spv = User::updateOrCreate(
             ['username' => 'SPV001'],

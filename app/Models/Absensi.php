@@ -19,6 +19,7 @@ class Absensi extends Model
         'sumber_input',
         'metode',
         'lokasi',
+        'office_id',
         'foto_masuk',
         'lat_masuk',
         'lng_masuk',
@@ -53,5 +54,10 @@ class Absensi extends Model
     public function penyetuju(): BelongsTo
     {
         return $this->belongsTo(User::class, 'disetujui_oleh');
+    }
+
+    public function office(): BelongsTo
+    {
+        return $this->belongsTo(Office::class);
     }
 }
