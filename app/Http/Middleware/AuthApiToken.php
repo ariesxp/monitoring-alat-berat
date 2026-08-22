@@ -15,7 +15,9 @@ class AuthApiToken
 {
     public function handle(Request $request, Closure $next): Response
     {
-        $bearer = $request->bearerToken();
+        // Ambil token dari header Authorization; fallback ke query ?token=
+        // agar tautan unduhan file (mis. ekspor Excel/PDF) bisa langsung dibuka.
+        $bearer = $request->bearerToken() ?: $request->query('token');
 
         if (!$bearer) {
             return response()->json(['message' => 'Token tidak ditemukan.'], 401);

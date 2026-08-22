@@ -1,10 +1,16 @@
 <?php
 
+use App\Http\Controllers\Api\AbsensiController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\DashboardController;
+use App\Http\Controllers\Api\IzinCutiController;
 use App\Http\Controllers\Api\LaporanController;
 use App\Http\Controllers\Api\MasterController;
+use App\Http\Controllers\Api\NotifikasiController;
+use App\Http\Controllers\Api\PegawaiController;
 use App\Http\Controllers\Api\PengeluaranController;
+use App\Http\Controllers\Api\RekapController;
+use App\Http\Controllers\Api\SettingController;
 use Illuminate\Support\Facades\Route;
 
 Route::post('/webhook/fonnte', [\App\Http\Controllers\Api\WhatsappWebhookController::class, 'handle'])
@@ -40,5 +46,39 @@ Route::prefix('v1')->group(function () {
         // Ringkasan & laporan
         Route::get('/dashboard', [DashboardController::class, 'index']);
         Route::get('/laporan', [LaporanController::class, 'index']);
+
+        /*
+        |----------------------------------------------------------------
+        | Aplikasi Absensi (AOB ABSENSI)
+        |----------------------------------------------------------------
+        */
+        // Absensi karyawan (selfie + geotag)
+        Route::get('/absensi/status', [AbsensiController::class, 'status']);
+        Route::post('/absensi/masuk', [AbsensiController::class, 'checkIn']);
+        Route::post('/absensi/pulang', [AbsensiController::class, 'checkOut']);
+        Route::get('/absensi/riwayat', [AbsensiController::class, 'riwayat']);
+
+        // Supervisi
+        Route::get('/absensi/dashboard', [AbsensiController::class, 'dashboard']);
+        Route::get('/absensi/hari-ini', [AbsensiController::class, 'todayList']);
+        Route::get('/absensi/{absensi}', [AbsensiController::class, 'show']);
+        Route::post('/absensi/{absensi}/setujui', [AbsensiController::class, 'approve']);
+
+        // Izin / Cuti
+        Route::get('/izin', [IzinCutiController::class, 'index']);
+        Route::post('/izin', [IzinCutiController::class, 'store']);
+        Route::post('/izin/{izin}/status', [IzinCutiController::class, 'updateStatus']);
+
+        // Rekap & laporan
+        Route::get('/rekap', [RekapController::class, 'index']);
+        Route::get('/rekap/export', [RekapController::class, 'export']);
+
+        // Pegawai & notifikasi
+        Route::get('/pegawai', [PegawaiController::class, 'index']);
+        Route::get('/notifikasi', [NotifikasiController::class, 'index']);
+
+        // Pengaturan lokasi kantor
+        Route::get('/pengaturan', [SettingController::class, 'show']);
+        Route::post('/pengaturan', [SettingController::class, 'update']);
     });
 });

@@ -69,6 +69,11 @@ class Operator extends Model
         return $this->hasMany(Absensi::class);
     }
 
+    public function izinCuti(): HasMany
+    {
+        return $this->hasMany(IzinCuti::class);
+    }
+
     public function detailGaji(): HasMany
     {
         return $this->hasMany(DetailGaji::class);

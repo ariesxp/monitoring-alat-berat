@@ -104,5 +104,8 @@ class DatabaseSeeder extends Seeder
 
         // Chart of Account berjenjang dari MASTER_COA_AOB.xlsx
         $this->call(CoaSeeder::class);
+
+        // Aplikasi Absensi: lokasi kantor, akun supervisor/karyawan, data contoh
+        $this->call(AbsensiSeeder::class);
     }
 }

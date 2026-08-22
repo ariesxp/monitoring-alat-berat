@@ -17,17 +17,41 @@ class Absensi extends Model
         'status',
         'keterangan',
         'sumber_input',
+        'metode',
+        'lokasi',
+        'foto_masuk',
+        'lat_masuk',
+        'lng_masuk',
+        'jarak_masuk',
+        'foto_pulang',
+        'lat_pulang',
+        'lng_pulang',
+        'jarak_pulang',
+        'disetujui_oleh',
+        'disetujui_pada',
     ];
 
     protected function casts(): array
     {
         return [
             'tanggal' => 'date',
+            'lat_masuk' => 'decimal:7',
+            'lng_masuk' => 'decimal:7',
+            'lat_pulang' => 'decimal:7',
+            'lng_pulang' => 'decimal:7',
+            'jarak_masuk' => 'integer',
+            'jarak_pulang' => 'integer',
+            'disetujui_pada' => 'datetime',
         ];
     }
 
     public function operator(): BelongsTo
     {
         return $this->belongsTo(Operator::class);
+    }
+
+    public function penyetuju(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'disetujui_oleh');
     }
 }

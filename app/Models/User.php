@@ -69,6 +69,11 @@ class User extends Authenticatable
         return $this->hasMany(ApiToken::class);
     }
 
+    public function operator(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        return $this->hasOne(Operator::class);
+    }
+
     public function hasPermission(string $slug): bool
     {
         // Admin selalu memiliki seluruh izin
