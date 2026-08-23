@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\IzinCutiController;
 use App\Http\Controllers\Api\LaporanController;
 use App\Http\Controllers\Api\MasterController;
 use App\Http\Controllers\Api\NotifikasiController;
+use App\Http\Controllers\Api\OfficeController;
 use App\Http\Controllers\Api\PegawaiController;
 use App\Http\Controllers\Api\PengeluaranController;
 use App\Http\Controllers\Api\RekapController;
@@ -80,5 +81,11 @@ Route::prefix('v1')->group(function () {
         // Pengaturan lokasi kantor
         Route::get('/pengaturan', [SettingController::class, 'show']);
         Route::post('/pengaturan', [SettingController::class, 'update']);
+
+        // Kelola kantor cabang (multi-office) — supervisor
+        Route::get('/offices', [OfficeController::class, 'index']);
+        Route::post('/offices', [OfficeController::class, 'store']);
+        Route::match(['put', 'patch'], '/offices/{office}', [OfficeController::class, 'update']);
+        Route::delete('/offices/{office}', [OfficeController::class, 'destroy']);
     });
 });
