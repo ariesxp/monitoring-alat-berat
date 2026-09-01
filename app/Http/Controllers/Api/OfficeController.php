@@ -81,6 +81,10 @@ class OfficeController extends Controller
             'lat'      => 'required|numeric|between:-90,90',
             'lng'      => 'required|numeric|between:-180,180',
             'radius_m' => 'required|integer|min:5|max:5000',
+            // Jam kerja per kantor (HH:MM). Kosong -> pakai setingan global.
+            'jam_masuk'       => 'nullable|date_format:H:i',
+            'batas_terlambat' => 'nullable|date_format:H:i',
+            'jam_pulang'      => 'nullable|date_format:H:i',
             'aktif'    => 'nullable|boolean',
         ]);
     }
@@ -93,6 +97,9 @@ class OfficeController extends Controller
             'lat'      => (float) $o->lat,
             'lng'      => (float) $o->lng,
             'radius_m' => (int) $o->radius_m,
+            'jam_masuk'       => $o->jam_masuk,
+            'batas_terlambat' => $o->batas_terlambat,
+            'jam_pulang'      => $o->jam_pulang,
             'aktif'    => (bool) $o->aktif,
         ];
     }

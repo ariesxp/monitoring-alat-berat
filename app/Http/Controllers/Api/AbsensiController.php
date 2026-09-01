@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Absensi;
+use App\Models\Office;
 use App\Models\Operator;
 use App\Support\Geo;
 use Carbon\Carbon;
@@ -349,11 +350,39 @@ class AbsensiController extends Controller
 
         if ($a->jam_masuk) {
             $masuk = Carbon::createFromFormat('H:i', substr((string) $a->jam_masuk, 0, 5));
-            $batas = Carbon::createFromFormat('H:i', $office['batas_terlambat']);
+            $batas = Carbon::createFromFormat('H:i', $this->batasTerlambatFor($a, $office));
             return $masuk->gt($batas) ? 'terlambat' : 'hadir';
         }
 
         return 'tidak_hadir';
+    }
+
+    /**
+     * Batas jam terlambat yang berlaku untuk sebuah absensi.
+     *
+     * Diambil dari kantor tempat absensi dilakukan (kolom offices.batas_terlambat),
+     * mis. Head Office 09:00 vs Site lain 07:00. Bila kantor tidak punya setingan
+     * sendiri (kolom kosong / absensi lama tanpa office_id), memakai batas global
+     * dari tabel settings.
+     */
+    protected function batasTerlambatFor(Absensi $a, array $office): string
+    {
+        if ($a->office_id) {
+            $perOffice = $this->officeBatasMap()[$a->office_id] ?? null;
+            if (!empty($perOffice)) {
+                return $perOffice;
+            }
+        }
+
+        return $office['batas_terlambat'];
+    }
+
+    /** Peta [office_id => batas_terlambat], di-cache agar tidak query per baris. */
+    protected ?array $officeBatasMap = null;
+
+    protected function officeBatasMap(): array
+    {
+        return $this->officeBatasMap ??= Office::pluck('batas_terlambat', 'id')->all();
     }
 
     protected function rowPayload(Operator $op, ?Absensi $a, array $office): array

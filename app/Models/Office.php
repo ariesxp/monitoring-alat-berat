@@ -14,6 +14,9 @@ class Office extends Model
         'lat',
         'lng',
         'radius_m',
+        'jam_masuk',
+        'batas_terlambat',
+        'jam_pulang',
         'aktif',
     ];
 

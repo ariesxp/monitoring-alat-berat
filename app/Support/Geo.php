@@ -39,12 +39,17 @@ class Geo
         $rows = Office::query()->where('aktif', true)->orderBy('id')->get();
 
         if ($rows->isNotEmpty()) {
+            $c = self::officeConfig();
             return $rows->map(fn (Office $o) => [
                 'id'       => $o->id,
                 'nama'     => $o->nama,
                 'lat'      => (float) $o->lat,
                 'lng'      => (float) $o->lng,
                 'radius_m' => (int) $o->radius_m,
+                // Jam kerja per kantor; kosong -> pakai setingan global.
+                'jam_masuk'       => $o->jam_masuk ?: $c['jam_masuk'],
+                'batas_terlambat' => $o->batas_terlambat ?: $c['batas_terlambat'],
+                'jam_pulang'      => $o->jam_pulang ?: $c['jam_pulang'],
             ])->values();
         }
 
@@ -56,6 +61,9 @@ class Geo
             'lat'      => $c['lat'],
             'lng'      => $c['lng'],
             'radius_m' => $c['radius_m'],
+            'jam_masuk'       => $c['jam_masuk'],
+            'batas_terlambat' => $c['batas_terlambat'],
+            'jam_pulang'      => $c['jam_pulang'],
         ]]);
     }
 
