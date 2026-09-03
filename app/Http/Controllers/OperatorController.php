@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Golongan;
 use App\Models\Operator;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 use Inertia\Inertia;
 
 class OperatorController extends Controller
@@ -65,6 +66,7 @@ class OperatorController extends Controller
             'status' => 'required|in:aktif,tidak_aktif,cuti',
             'status_perkawinan' => 'nullable|in:Belum Kawin,Kawin,Cerai Hidup,Cerai Mati',
             'pendidikan' => 'nullable|string|max:50',
+            'password' => 'nullable|string|min:5',
         ]);
 
         if (!empty($validated['golongan_id'])) {
@@ -73,6 +75,9 @@ class OperatorController extends Controller
                 $validated['gaji_pokok'] = $golongan->gaji_golongan;
             }
         }
+
+        // Password login aplikasi absensi (username = NIK). Default "12345" bila kosong.
+        $validated['password'] = Hash::make(!empty($validated['password']) ? $validated['password'] : '12345');
 
         $validated['kode_karyawan'] = $this->generateKodeKaryawan($validated['jabatan']);
 
@@ -123,6 +128,7 @@ class OperatorController extends Controller
             'status' => 'required|in:aktif,tidak_aktif,cuti',
             'status_perkawinan' => 'nullable|in:Belum Kawin,Kawin,Cerai Hidup,Cerai Mati',
             'pendidikan' => 'nullable|string|max:50',
+            'password' => 'nullable|string|min:5',
         ]);
 
         if (!empty($validated['golongan_id'])) {
@@ -130,6 +136,13 @@ class OperatorController extends Controller
             if ($golongan) {
                 $validated['gaji_pokok'] = $golongan->gaji_golongan;
             }
+        }
+
+        // Ubah password hanya bila diisi; kosong = biarkan password lama.
+        if (!empty($validated['password'])) {
+            $validated['password'] = Hash::make($validated['password']);
+        } else {
+            unset($validated['password']);
         }
 
         $operator->update($validated);

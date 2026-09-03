@@ -16,6 +16,7 @@ class Operator extends Model
         'kode_karyawan',
         'nik_karyawan',
         'nama',
+        'password',
         'nik',
         'jenis_kelamin',
         'tempat_lahir',
@@ -32,6 +33,10 @@ class Operator extends Model
         'status_perkawinan',
         'pendidikan',
         'foto',
+    ];
+
+    protected $hidden = [
+        'password',
     ];
 
     protected function casts(): array

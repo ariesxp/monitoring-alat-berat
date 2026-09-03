@@ -37,6 +37,7 @@ export default function Form({ operator, golongans = [], nikMeta = null }) {
         status: operator?.status || 'aktif',
         status_perkawinan: operator?.status_perkawinan || '',
         pendidikan: operator?.pendidikan || '',
+        password: '',
     });
 
     const formatRp = (v) => new Intl.NumberFormat('id-ID').format(v);
@@ -225,6 +226,12 @@ export default function Form({ operator, golongans = [], nikMeta = null }) {
                                     <option value="tidak_aktif">Tidak Aktif</option>
                                     <option value="cuti">Cuti</option>
                                 </select>
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Password Login Absensi</label>
+                                <input type="text" value={data.password} onChange={(e) => setData('password', e.target.value)} placeholder={isEdit ? 'Kosongkan bila tidak diubah' : 'Kosongkan = default 12345'} className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm font-mono focus:ring-2 focus:ring-blue-500" />
+                                <p className="text-xs text-gray-400 mt-1">Dipakai login aplikasi absensi. Username = NIK.</p>
+                                {errors.password && <p className="text-red-500 text-xs mt-1">{errors.password}</p>}
                             </div>
                         </div>
                     </div>
