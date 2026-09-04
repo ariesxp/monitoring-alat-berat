@@ -6,7 +6,7 @@ import {
     Menu, X, LogOut, ChevronDown, Bell, Layers, BookOpen, Receipt,
     FolderTree, ListTree, ShoppingCart, Package, UserCog, ShieldCheck,
     KeyRound, History, PanelLeftClose, PanelLeftOpen,
-    ListChecks, TrendingUp, Scale
+    ListChecks, TrendingUp, Scale, CalendarRange, CalendarClock, CalendarCheck
 } from 'lucide-react';
 
 const menuItems = [
@@ -28,6 +28,9 @@ const menuItems = [
     { label: 'Stok Gudang', href: '/stok-gudang', icon: Warehouse, roles: ['admin', 'supervisor', 'operator'] },
     { type: 'separator', label: 'Keuangan', roles: ['admin'] },
     { label: 'Absensi', href: '/absensi', icon: CalendarDays, roles: ['admin'] },
+    { label: 'Laporan Absensi Mingguan', href: '/laporan-absensi/mingguan', icon: CalendarRange, roles: ['admin'] },
+    { label: 'Laporan Absensi Bulanan', href: '/laporan-absensi/bulanan', icon: CalendarClock, roles: ['admin'] },
+    { label: 'Laporan Absensi Tahunan', href: '/laporan-absensi/tahunan', icon: CalendarCheck, roles: ['admin'] },
     { label: 'Gaji Karyawan', href: '/gaji', icon: Wallet, roles: ['admin'] },
     { type: 'separator', label: 'Finance', roles: ['admin'] },
     { label: 'Main Account', href: '/main-account', icon: FolderTree, roles: ['admin'] },

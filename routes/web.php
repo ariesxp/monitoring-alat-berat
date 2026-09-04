@@ -12,6 +12,7 @@ use App\Http\Controllers\FinancialStatementTypeController;
 use App\Http\Controllers\GajiKaryawanController;
 use App\Http\Controllers\GolonganController;
 use App\Http\Controllers\KontrakKerjaController;
+use App\Http\Controllers\LaporanAbsensiController;
 use App\Http\Controllers\LaporanHarianController;
 use App\Http\Controllers\MainAccountController;
 use App\Http\Controllers\OperatorController;
@@ -55,6 +56,9 @@ Route::middleware('auth')->group(function () {
         Route::resource('gaji', GajiKaryawanController::class)->except(['edit', 'update']);
         Route::post('gaji/{penggajian}/hitung', [GajiKaryawanController::class, 'hitung'])->name('gaji.hitung');
         Route::resource('absensi', AbsensiController::class)->only(['index', 'store']);
+        Route::get('laporan-absensi/mingguan', [LaporanAbsensiController::class, 'mingguan'])->name('laporan-absensi.mingguan');
+        Route::get('laporan-absensi/bulanan', [LaporanAbsensiController::class, 'bulanan'])->name('laporan-absensi.bulanan');
+        Route::get('laporan-absensi/tahunan', [LaporanAbsensiController::class, 'tahunan'])->name('laporan-absensi.tahunan');
         Route::resource('main-account', MainAccountController::class)->except(['show']);
         Route::resource('financial-statement-type', FinancialStatementTypeController::class)->except(['show']);
         Route::resource('account', AccountController::class)->except(['show']);
