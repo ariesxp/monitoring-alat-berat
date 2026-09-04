@@ -14,6 +14,80 @@ class LaporanAbsensiController extends Controller
     private array $statuses = ['hadir', 'sakit', 'izin', 'alpha', 'cuti', 'libur'];
 
     /**
+     * Absensi Harian.
+     * Menampilkan Tanggal, Jam In, dan Jam Out untuk 7 hari terakhir per operator.
+     */
+    public function harian(Request $request)
+    {
+        Carbon::setLocale('id');
+
+        $end = now()->startOfDay();
+        $start = (clone $end)->subDays(6);
+
+        // Susun 7 tanggal (dari terlama ke terbaru) sebagai kolom.
+        $hari = [];
+        for ($d = 0; $d < 7; $d++) {
+            $tgl = (clone $start)->addDays($d);
+            $hari[] = [
+                'tanggal' => $tgl->toDateString(),
+                'hari' => $tgl->isoFormat('ddd'),
+                'label' => $tgl->isoFormat('DD/MM/YYYY'),
+            ];
+        }
+
+        $operatorId = $request->get('operator_id');
+
+        $operators = Operator::aktif()
+            ->when($operatorId, fn ($q) => $q->where('id', $operatorId))
+            ->orderBy('nama')
+            ->get();
+
+        $absensi = Absensi::whereBetween('tanggal', [$start->toDateString(), $end->toDateString()])
+            ->get()
+            ->groupBy('operator_id');
+
+        $laporan = $operators->values()->map(function ($op, $i) use ($absensi, $hari) {
+            $records = ($absensi->get($op->id) ?? collect())
+                ->keyBy(fn ($r) => Carbon::parse($r->tanggal)->toDateString());
+
+            // Map tanggal => jam in/out/status.
+            $harian = [];
+            $totalKehadiran = 0;
+            foreach ($hari as $h) {
+                $rec = $records->get($h['tanggal']);
+                if ($rec && $rec->status === 'hadir') {
+                    $totalKehadiran++;
+                }
+                $harian[$h['tanggal']] = [
+                    'in' => $rec?->jam_masuk,
+                    'out' => $rec?->jam_pulang,
+                    'status' => $rec?->status,
+                ];
+            }
+
+            return [
+                'id' => $op->id,
+                'no' => $i + 1,
+                'nama' => $op->nama,
+                'jabatan' => $op->jabatan,
+                'harian' => $harian,
+                'total_kehadiran' => $totalKehadiran,
+            ];
+        })->values();
+
+        return Inertia::render('LaporanAbsensi/Harian', [
+            'laporan' => $laporan,
+            'hari' => $hari,
+            'periode' => [
+                'mulai' => $start->isoFormat('D MMMM Y'),
+                'selesai' => $end->isoFormat('D MMMM Y'),
+            ],
+            'operators' => Operator::aktif()->orderBy('nama')->get(['id', 'nama']),
+            'operatorId' => $operatorId,
+        ]);
+    }
+
+    /**
      * Laporan Absensi Mingguan.
      * Menampilkan grid harian (Senin–Minggu) beserta rekap status per operator.
      */

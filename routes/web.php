@@ -56,6 +56,7 @@ Route::middleware('auth')->group(function () {
         Route::resource('gaji', GajiKaryawanController::class)->except(['edit', 'update']);
         Route::post('gaji/{penggajian}/hitung', [GajiKaryawanController::class, 'hitung'])->name('gaji.hitung');
         Route::resource('absensi', AbsensiController::class)->only(['index', 'store']);
+        Route::get('laporan-absensi/harian', [LaporanAbsensiController::class, 'harian'])->name('laporan-absensi.harian');
         Route::get('laporan-absensi/mingguan', [LaporanAbsensiController::class, 'mingguan'])->name('laporan-absensi.mingguan');
         Route::get('laporan-absensi/bulanan', [LaporanAbsensiController::class, 'bulanan'])->name('laporan-absensi.bulanan');
         Route::get('laporan-absensi/tahunan', [LaporanAbsensiController::class, 'tahunan'])->name('laporan-absensi.tahunan');
