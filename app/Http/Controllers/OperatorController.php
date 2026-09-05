@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Golongan;
+use App\Models\Jabatan;
 use App\Models\Operator;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -36,6 +37,7 @@ class OperatorController extends Controller
     {
         return Inertia::render('Operator/Form', [
             'golongans' => Golongan::orderBy('kode_golongan')->get(),
+            'jabatans' => Jabatan::orderBy('nama_jabatan')->get(),
             'nikMeta' => [
                 'yymm' => now()->format('ym'),
                 'nextSeq' => [
@@ -105,6 +107,7 @@ class OperatorController extends Controller
         return Inertia::render('Operator/Form', [
             'operator' => $operator,
             'golongans' => Golongan::orderBy('kode_golongan')->get(),
+            'jabatans' => Jabatan::orderBy('nama_jabatan')->get(),
         ]);
     }
 

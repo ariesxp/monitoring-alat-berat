@@ -6,7 +6,8 @@ import {
     Menu, X, LogOut, ChevronDown, Bell, Layers, BookOpen, Receipt,
     FolderTree, ListTree, ShoppingCart, Package, UserCog, ShieldCheck,
     KeyRound, History, PanelLeftClose, PanelLeftOpen,
-    ListChecks, TrendingUp, Scale, CalendarRange, CalendarClock, CalendarCheck, Clock, Gauge
+    ListChecks, TrendingUp, Scale, CalendarRange, CalendarClock, CalendarCheck, Clock, Gauge,
+    BriefcaseBusiness
 } from 'lucide-react';
 
 const menuItems = [
@@ -16,6 +17,7 @@ const menuItems = [
     { label: 'Operator / Karyawan', href: '/operator', icon: Users, roles: ['admin'] },
     { label: 'Client', href: '/client', icon: FileText, roles: ['admin'] },
     { label: 'Golongan', href: '/golongan', icon: Layers, roles: ['admin'] },
+    { label: 'Jabatan', href: '/jabatan', icon: BriefcaseBusiness, roles: ['admin'] },
     { type: 'separator', label: 'Operasional', roles: ['admin', 'supervisor', 'operator'] },
     { label: 'Kontrak Kerja', href: '/kontrak-kerja', icon: FileText, roles: ['admin', 'supervisor'] },
     { label: 'SPK', href: '/spk', icon: ClipboardList, roles: ['admin', 'supervisor'] },

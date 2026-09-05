@@ -10,6 +10,7 @@ use App\Http\Controllers\FinancialReportController;
 use App\Http\Controllers\FinancialStatementTypeController;
 use App\Http\Controllers\GajiKaryawanController;
 use App\Http\Controllers\GolonganController;
+use App\Http\Controllers\JabatanController;
 use App\Http\Controllers\KontrakKerjaController;
 use App\Http\Controllers\LaporanAbsensiController;
 use App\Http\Controllers\LaporanHarianController;
@@ -53,6 +54,7 @@ Route::middleware('auth')->group(function () {
         Route::resource('operator', OperatorController::class);
         Route::resource('client', ClientController::class);
         Route::resource('golongan', GolonganController::class)->except(['show']);
+        Route::resource('jabatan', JabatanController::class)->except(['show']);
         Route::resource('gaji', GajiKaryawanController::class)->except(['edit', 'update']);
         Route::post('gaji/{penggajian}/hitung', [GajiKaryawanController::class, 'hitung'])->name('gaji.hitung');
         Route::get('laporan-absensi/harian', [LaporanAbsensiController::class, 'harian'])->name('laporan-absensi.harian');

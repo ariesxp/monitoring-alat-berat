@@ -51,6 +51,9 @@ class DatabaseSeeder extends Seeder
         // Golongan
         $this->call(GolonganSeeder::class);
 
+        // Jabatan (master untuk dropdown Operator)
+        $this->call(JabatanSeeder::class);
+
         // Alat Berat
         $alatData = [
             ['kode_alat' => 'EXC-001', 'nama_alat' => 'Excavator Komatsu PC200-8', 'jenis' => 'Excavator', 'merk' => 'Komatsu', 'tahun' => 2020, 'status' => 'tersedia', 'no_mesin' => 'SAA6D107E-1', 'no_chassis' => 'KMTPC249J9A012345', 'dealer' => 'United Tractors', 'harga' => 2500000000, 'invoice' => 'INV-2020-0456', 'hm_awal' => 0],

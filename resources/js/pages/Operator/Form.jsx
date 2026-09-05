@@ -1,23 +1,14 @@
 import AppLayout from '../../layouts/AppLayout';
 import { Head, useForm, Link } from '@inertiajs/react';
 
-const JABATAN_OPTIONS = [
-    'Direksi',
-    'Staff HO',
-    'Staff Site',
-    'Operator Excavator',
-    'Operator Dozer',
-    'Operator Tractor',
-    'Driver',
-    'Mandor',
-    'Mekanik',
-    'Admin',
-    'Helper',
-];
-
 const DEPARTEMEN_OPTIONS = ['Head Office', 'Operasional'];
 
-export default function Form({ operator, golongans = [], nikMeta = null }) {
+export default function Form({ operator, golongans = [], jabatans = [], nikMeta = null }) {
+    // Daftar nama jabatan dari master; sertakan nilai lama operator bila belum ada di master.
+    const jabatanOptions = jabatans.map((j) => j.nama_jabatan);
+    if (operator?.jabatan && !jabatanOptions.includes(operator.jabatan)) {
+        jabatanOptions.push(operator.jabatan);
+    }
     const isEdit = !!operator;
     const { data, setData, post, put, processing, errors } = useForm({
         nama: operator?.nama || '',
@@ -175,7 +166,7 @@ export default function Form({ operator, golongans = [], nikMeta = null }) {
                                 <label className="block text-sm font-medium text-gray-700 mb-1">Jabatan <span className="text-red-500">*</span></label>
                                 <select value={data.jabatan} onChange={(e) => setData('jabatan', e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500">
                                     <option value="">-- Pilih Jabatan --</option>
-                                    {JABATAN_OPTIONS.map((j) => (
+                                    {jabatanOptions.map((j) => (
                                         <option key={j} value={j}>{j}</option>
                                     ))}
                                 </select>
