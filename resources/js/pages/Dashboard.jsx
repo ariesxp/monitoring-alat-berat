@@ -42,7 +42,13 @@ function formatRupiah(num) {
     return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(num);
 }
 
-export default function Dashboard({ stats, status_alat, biaya_per_kategori, biaya_bulanan, laporan_terbaru, bulan }) {
+function formatM3(num) {
+    return new Intl.NumberFormat('id-ID', { maximumFractionDigits: 2 }).format(num || 0);
+}
+
+export default function Dashboard({ stats, status_alat, biaya_per_kategori, biaya_bulanan, laporan_terbaru, progress_area = [], total_muatan = 0, bulan }) {
+    const areaColors = ['#2563eb', '#059669', '#d97706', '#7c3aed', '#db2777', '#0891b2', '#65a30d', '#dc2626'];
+    const maxArea = Math.max(1, ...progress_area.map((a) => a.total_m3));
     const statusLabels = { tersedia: 'Tersedia', beroperasi: 'Beroperasi', maintenance: 'Maintenance', rusak: 'Rusak' };
     const statusColors = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444'];
 
@@ -99,6 +105,43 @@ export default function Dashboard({ stats, status_alat, biaya_per_kategori, biay
                         <Doughnut data={doughnutData} options={{ responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }} />
                     </div>
                 </div>
+            </div>
+
+            <div className="bg-white rounded-xl border border-gray-200 p-5 mb-6">
+                <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-sm font-semibold text-gray-700">Progress Pekerjaan — Muatan Terangkut per Area</h3>
+                    <span className="text-sm font-semibold text-gray-800">
+                        Total: {formatM3(total_muatan)} m³
+                    </span>
+                </div>
+                {progress_area.length === 0 ? (
+                    <p className="py-8 text-center text-gray-400 text-sm">Belum ada muatan m³ tercatat.</p>
+                ) : (
+                    <div className="space-y-3">
+                        {progress_area.map((a, i) => {
+                            const pctTotal = total_muatan > 0 ? (a.total_m3 / total_muatan) * 100 : 0;
+                            const pctBar = (a.total_m3 / maxArea) * 100;
+                            const color = areaColors[i % areaColors.length];
+                            return (
+                                <div key={a.area}>
+                                    <div className="flex items-center justify-between text-sm mb-1">
+                                        <span className="font-medium text-gray-700">{a.area}</span>
+                                        <span className="text-gray-500">
+                                            <span className="font-semibold text-gray-800">{formatM3(a.total_m3)} m³</span>
+                                            <span className="text-xs ml-1">({pctTotal.toFixed(1)}%)</span>
+                                        </span>
+                                    </div>
+                                    <div className="h-3 w-full bg-gray-100 rounded-full overflow-hidden">
+                                        <div
+                                            className="h-full rounded-full transition-all"
+                                            style={{ width: `${pctBar}%`, backgroundColor: color }}
+                                        />
+                                    </div>
+                                </div>
+                            );
+                        })}
+                    </div>
+                )}
             </div>
 
             <div className="bg-white rounded-xl border border-gray-200 p-5">

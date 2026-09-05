@@ -57,6 +57,22 @@ class DashboardController extends Controller
             ->orderBy('bulan')
             ->pluck('total', 'bulan');
 
+        // Progress Pekerjaan: akumulasi muatan m³ yang sudah diangkut per area (total s/d kini).
+        $progressArea = LaporanHarian::query()
+            ->leftJoin('spk', 'laporan_harian.spk_id', '=', 'spk.id')
+            ->whereRaw("LOWER(laporan_harian.satuan_volume) IN ('m³', 'm3', 'meter kubik', 'kubik')")
+            ->selectRaw("COALESCE(NULLIF(laporan_harian.lokasi_kerja, ''), spk.lokasi_kerja, 'Tanpa Area') as area")
+            ->selectRaw('SUM(laporan_harian.volume_pekerjaan) as total_m3')
+            ->groupBy('area')
+            ->orderByDesc('total_m3')
+            ->get()
+            ->map(fn ($r) => [
+                'area' => $r->area,
+                'total_m3' => round((float) $r->total_m3, 2),
+            ]);
+
+        $totalMuatan = round($progressArea->sum('total_m3'), 2);
+
         return Inertia::render('Dashboard', [
             'stats' => [
                 'kontrak_aktif' => $kontrakAktif,
@@ -71,6 +87,8 @@ class DashboardController extends Controller
             'biaya_per_kategori' => $biayaPerKategori,
             'biaya_bulanan' => $biayaBulanan,
             'laporan_terbaru' => $laporanTerbaru,
+            'progress_area' => $progressArea,
+            'total_muatan' => $totalMuatan,
             'bulan' => $bulan,
         ]);
     }

@@ -48,7 +48,19 @@ class LaporanKmController extends Controller
             ->groupBy('alat_berat_id')
             ->pluck('total', 'alat_berat_id');
 
-        $alatBerat = AlatBerat::orderBy('kode_alat')->get();
+        // Daftar jenis alat untuk dropdown filter.
+        $jenisList = AlatBerat::whereNotNull('jenis')
+            ->where('jenis', '!=', '')
+            ->distinct()
+            ->orderBy('jenis')
+            ->pluck('jenis')
+            ->values();
+
+        $jenis = $request->get('jenis');
+
+        $alatBerat = AlatBerat::when($jenis, fn ($q) => $q->where('jenis', $jenis))
+            ->orderBy('kode_alat')
+            ->get();
 
         $laporan = $alatBerat->map(function ($alat, $i) use ($sebelumnya, $bulanIni) {
             $km_sebelumnya = (float) ($sebelumnya[$alat->id] ?? 0);
@@ -77,6 +89,8 @@ class LaporanKmController extends Controller
             'bulan' => $bulan,
             'periode' => $periode->isoFormat('MMMM Y'),
             'totals' => $totals,
+            'jenisList' => $jenisList,
+            'jenis' => $jenis,
         ]);
     }
 }

@@ -5,20 +5,34 @@ import { Printer } from 'lucide-react';
 const fmtKm = (v) =>
     new Intl.NumberFormat('id-ID', { maximumFractionDigits: 2 }).format(v || 0);
 
-export default function Bulanan({ laporan, bulan, periode, totals }) {
+export default function Bulanan({ laporan, bulan, periode, totals, jenisList = [], jenis }) {
+    const applyFilter = (patch) =>
+        router.get('/laporan-km/bulanan', { bulan, jenis: jenis || undefined, ...patch }, { preserveState: true });
+
     return (
         <AppLayout title="Rekap KM Alat Berat">
             <Head title="Rekap KM Alat Berat" />
 
             <div className="flex flex-wrap items-center justify-between gap-3 mb-4 print:hidden">
-                <div className="flex items-center gap-2">
+                <div className="flex flex-wrap items-center gap-2">
                     <label className="text-sm text-gray-600">Pilih bulan:</label>
                     <input
                         type="month"
                         value={bulan}
-                        onChange={(e) => router.get('/laporan-km/bulanan', { bulan: e.target.value }, { preserveState: true })}
+                        onChange={(e) => applyFilter({ bulan: e.target.value })}
                         className="px-3 py-2 border border-gray-300 rounded-lg text-sm"
                     />
+                    <label className="text-sm text-gray-600 ml-1">Jenis alat:</label>
+                    <select
+                        value={jenis || ''}
+                        onChange={(e) => applyFilter({ jenis: e.target.value || undefined })}
+                        className="px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white"
+                    >
+                        <option value="">Semua jenis</option>
+                        {jenisList.map((j) => (
+                            <option key={j} value={j}>{j}</option>
+                        ))}
+                    </select>
                 </div>
                 <button onClick={() => window.print()} className="inline-flex items-center gap-2 px-3 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700">
                     <Printer className="w-4 h-4" /> Cetak
@@ -26,7 +40,10 @@ export default function Bulanan({ laporan, bulan, periode, totals }) {
             </div>
 
             <div className="mb-3">
-                <h2 className="text-base font-semibold text-gray-800">Rekap Pemakaian KM — Bulan: {periode}</h2>
+                <h2 className="text-base font-semibold text-gray-800">
+                    Rekap Pemakaian KM — Bulan: {periode}
+                    {jenis && <span className="text-gray-500 font-normal"> · Jenis: {jenis}</span>}
+                </h2>
                 <p className="text-xs text-gray-500 mt-0.5">
                     KM Sebelumnya = akumulasi pemakaian sampai akhir bulan lalu. KM s/d Bulan = KM Sebelumnya + Bulan Ini.
                 </p>
