@@ -6,9 +6,12 @@ import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, ArcElement, T
 ChartJS.register(CategoryScale, LinearScale, BarElement, ArcElement, Title, Tooltip, Legend);
 
 const formatRp = (v) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(v);
+const formatM3 = (v) => new Intl.NumberFormat('id-ID', { maximumFractionDigits: 2 }).format(v || 0);
 
-export default function Index({ jamKerjaPerAlat, biayaPerBulan, kontrakPerStatus, utilisasiAlat, bbmPerBulan, tahun }) {
+export default function Index({ jamKerjaPerAlat, biayaPerBulan, kontrakPerStatus, utilisasiAlat, bbmPerBulan, progressArea = [], totalMuatan = 0, tahun }) {
     const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+    const areaColors = ['#2563eb', '#059669', '#d97706', '#7c3aed', '#db2777', '#0891b2', '#65a30d', '#dc2626'];
+    const maxArea = Math.max(1, ...progressArea.map((a) => a.total_m3));
 
     const bbmData = {
         labels: Object.keys(bbmPerBulan || {}).map(b => months[parseInt(b.split('-')[1]) - 1]),
@@ -38,6 +41,38 @@ export default function Index({ jamKerjaPerAlat, biayaPerBulan, kontrakPerStatus
                     <h3 className="text-sm font-semibold text-gray-700 mb-4">Utilisasi Alat Berat</h3>
                     <div className="h-64 flex items-center justify-center"><Doughnut data={utilisasiData} options={{ responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }} /></div>
                 </div>
+            </div>
+
+            <div className="bg-white rounded-xl border border-gray-200 p-5 mb-6">
+                <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-sm font-semibold text-gray-700">Progress Pekerjaan — Muatan Terangkut per Area ({tahun})</h3>
+                    <span className="text-sm font-semibold text-gray-800">Total: {formatM3(totalMuatan)} m³</span>
+                </div>
+                {progressArea.length === 0 ? (
+                    <p className="py-8 text-center text-gray-400 text-sm">Belum ada muatan m³ tercatat pada tahun ini.</p>
+                ) : (
+                    <div className="space-y-3">
+                        {progressArea.map((a, i) => {
+                            const pctTotal = totalMuatan > 0 ? (a.total_m3 / totalMuatan) * 100 : 0;
+                            const pctBar = (a.total_m3 / maxArea) * 100;
+                            const color = areaColors[i % areaColors.length];
+                            return (
+                                <div key={a.area}>
+                                    <div className="flex items-center justify-between text-sm mb-1">
+                                        <span className="font-medium text-gray-700">{a.area}</span>
+                                        <span className="text-gray-500">
+                                            <span className="font-semibold text-gray-800">{formatM3(a.total_m3)} m³</span>
+                                            <span className="text-xs ml-1">({pctTotal.toFixed(1)}%)</span>
+                                        </span>
+                                    </div>
+                                    <div className="h-3 w-full bg-gray-100 rounded-full overflow-hidden">
+                                        <div className="h-full rounded-full transition-all" style={{ width: `${pctBar}%`, backgroundColor: color }} />
+                                    </div>
+                                </div>
+                            );
+                        })}
+                    </div>
+                )}
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

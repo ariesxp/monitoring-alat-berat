@@ -41,12 +41,31 @@ class StatistikController extends Controller
             ->orderBy('bulan')
             ->pluck('total', 'bulan');
 
+        // Progress Pekerjaan: akumulasi muatan m³ yang sudah diangkut per area (tahun terpilih).
+        $progressArea = LaporanHarian::query()
+            ->leftJoin('spk', 'laporan_harian.spk_id', '=', 'spk.id')
+            ->whereYear('laporan_harian.tanggal', $year)
+            ->whereRaw("LOWER(laporan_harian.satuan_volume) IN ('m³', 'm3', 'meter kubik', 'kubik')")
+            ->selectRaw("COALESCE(NULLIF(laporan_harian.lokasi_kerja, ''), spk.lokasi_kerja, 'Tanpa Area') as area")
+            ->selectRaw('SUM(laporan_harian.volume_pekerjaan) as total_m3')
+            ->groupBy('area')
+            ->orderByDesc('total_m3')
+            ->get()
+            ->map(fn ($r) => [
+                'area' => $r->area,
+                'total_m3' => round((float) $r->total_m3, 2),
+            ]);
+
+        $totalMuatan = round($progressArea->sum('total_m3'), 2);
+
         return Inertia::render('Statistik/Index', [
             'jamKerjaPerAlat' => $jamKerjaPerAlat,
             'biayaPerBulan' => $biayaPerBulan,
             'kontrakPerStatus' => $kontrakPerStatus,
             'utilisasiAlat' => $utilisasiAlat,
             'bbmPerBulan' => $bbmPerBulan,
+            'progressArea' => $progressArea,
+            'totalMuatan' => $totalMuatan,
             'tahun' => $year,
         ]);
     }
