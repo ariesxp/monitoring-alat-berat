@@ -53,6 +53,8 @@ class AuthController extends Controller
         $operator = Operator::whereRaw("COALESCE(NULLIF(nik_karyawan, ''), nik) = ?", [$login])->first();
 
         if ($operator && !empty($operator->password) && Hash::check($data['password'], $operator->password)) {
+            $this->assertOperatorAktif($operator);
+
             $user = $this->userForOperator($operator);
             return $this->issueFor($user, $data['device'] ?? null);
         }
@@ -62,9 +64,34 @@ class AuthController extends Controller
         ]);
     }
 
+    /**
+     * Tolak operator berstatus tidak aktif. Dipakai di kedua jalur login
+     * (baik langsung via operator, maupun via akun users yang tertaut
+     * operator) agar tidak bisa di-bypass setelah akun users terbentuk.
+     */
+    protected function assertOperatorAktif(?Operator $operator): void
+    {
+        if (!$operator) {
+            return;
+        }
+
+        // Normalisasi: 'Tidak Aktif', ' tidak_aktif ', 'nonaktif' -> tidak aktif.
+        $status = strtolower(trim((string) $operator->status));
+        $status = str_replace([' ', '-'], '_', $status);
+
+        if (in_array($status, ['tidak_aktif', 'nonaktif', 'non_aktif'], true)) {
+            throw ValidationException::withMessages([
+                'username' => ['Status Anda Tidak Aktif'],
+            ]);
+        }
+    }
+
     /** Terbitkan token Bearer untuk user. */
     protected function issueFor(User $user, ?string $device)
     {
+        // Berlaku juga untuk Jalur 1 (akun users tertaut operator).
+        $this->assertOperatorAktif($user->operator);
+
         $token = ApiToken::issue($user, $device);
 
         return response()->json([
@@ -157,6 +184,7 @@ class AuthController extends Controller
                 'nama'    => $operator->nama,
                 'nik'     => $operator->nik_karyawan ?: $operator->nik,
                 'jabatan' => $operator->jabatan,
+                'status'  => $operator->status,
                 'foto'    => $operator->foto ? asset('storage/' . $operator->foto) : null,
             ] : null,
         ];
