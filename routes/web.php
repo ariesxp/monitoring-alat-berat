@@ -1,6 +1,5 @@
 <?php
 
-use App\Http\Controllers\AbsensiController;
 use App\Http\Controllers\AccountController;
 use App\Http\Controllers\AuditLogController;
 use App\Http\Controllers\AlatBeratController;
@@ -14,6 +13,7 @@ use App\Http\Controllers\GolonganController;
 use App\Http\Controllers\KontrakKerjaController;
 use App\Http\Controllers\LaporanAbsensiController;
 use App\Http\Controllers\LaporanHarianController;
+use App\Http\Controllers\LaporanKmController;
 use App\Http\Controllers\MainAccountController;
 use App\Http\Controllers\OperatorController;
 use App\Http\Controllers\PenerimaanGudangController;
@@ -55,7 +55,6 @@ Route::middleware('auth')->group(function () {
         Route::resource('golongan', GolonganController::class)->except(['show']);
         Route::resource('gaji', GajiKaryawanController::class)->except(['edit', 'update']);
         Route::post('gaji/{penggajian}/hitung', [GajiKaryawanController::class, 'hitung'])->name('gaji.hitung');
-        Route::resource('absensi', AbsensiController::class)->only(['index', 'store']);
         Route::get('laporan-absensi/harian', [LaporanAbsensiController::class, 'harian'])->name('laporan-absensi.harian');
         Route::get('laporan-absensi/mingguan', [LaporanAbsensiController::class, 'mingguan'])->name('laporan-absensi.mingguan');
         Route::get('laporan-absensi/bulanan', [LaporanAbsensiController::class, 'bulanan'])->name('laporan-absensi.bulanan');
@@ -86,6 +85,7 @@ Route::middleware('auth')->group(function () {
         Route::post('spk/{spk}/approve', [SpkController::class, 'approve'])->name('spk.approve');
         Route::patch('spk/{spk}/status', [SpkController::class, 'updateStatus'])->name('spk.status');
         Route::get('statistik', [StatistikController::class, 'index'])->name('statistik.index');
+        Route::get('laporan-km/bulanan', [LaporanKmController::class, 'bulanan'])->name('laporan-km.bulanan');
         Route::resource('pengeluaran-gudang', PengeluaranGudangController::class);
     });
 

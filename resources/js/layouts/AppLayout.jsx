@@ -6,7 +6,7 @@ import {
     Menu, X, LogOut, ChevronDown, Bell, Layers, BookOpen, Receipt,
     FolderTree, ListTree, ShoppingCart, Package, UserCog, ShieldCheck,
     KeyRound, History, PanelLeftClose, PanelLeftOpen,
-    ListChecks, TrendingUp, Scale, CalendarRange, CalendarClock, CalendarCheck, Clock
+    ListChecks, TrendingUp, Scale, CalendarRange, CalendarClock, CalendarCheck, Clock, Gauge
 } from 'lucide-react';
 
 const menuItems = [
@@ -27,7 +27,6 @@ const menuItems = [
     { label: 'Purchase Request', href: '/purchase-request', icon: ShoppingCart, roles: ['admin', 'supervisor', 'operator'] },
     { label: 'Stok Gudang', href: '/stok-gudang', icon: Warehouse, roles: ['admin', 'supervisor', 'operator'] },
     { type: 'separator', label: 'Keuangan', roles: ['admin'] },
-    { label: 'Absensi', href: '/absensi', icon: CalendarDays, roles: ['admin'] },
     { label: 'Absensi Harian', href: '/laporan-absensi/harian', icon: Clock, roles: ['admin'] },
     { label: 'Absensi Mingguan', href: '/laporan-absensi/mingguan', icon: CalendarRange, roles: ['admin'] },
     { label: 'Absensi Bulanan', href: '/laporan-absensi/bulanan', icon: CalendarClock, roles: ['admin'] },
@@ -45,6 +44,7 @@ const menuItems = [
     { label: 'Trial Balance', href: '/trial-balance', icon: Scale, roles: ['admin'] },
     { type: 'separator', label: 'Laporan', roles: ['admin', 'supervisor'] },
     { label: 'Statistik', href: '/statistik', icon: BarChart3, roles: ['admin', 'supervisor'] },
+    { label: 'Rekap KM Alat', href: '/laporan-km/bulanan', icon: Gauge, roles: ['admin', 'supervisor'] },
     { type: 'separator', label: 'Manajemen User', roles: ['admin'] },
     { label: 'Users', href: '/user', icon: UserCog, roles: ['admin'] },
     { label: 'Roles', href: '/role', icon: ShieldCheck, roles: ['admin'] },
