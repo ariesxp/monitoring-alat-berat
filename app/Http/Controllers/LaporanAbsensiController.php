@@ -7,17 +7,31 @@ use App\Models\Operator;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
+use PhpOffice\PhpSpreadsheet\Cell\DataType;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class LaporanAbsensiController extends Controller
 {
     /** Daftar status absensi yang direkap. */
     private array $statuses = ['hadir', 'sakit', 'izin', 'alpha', 'cuti', 'libur'];
 
+    /** Label tampilan tiap status. */
+    private array $statusLabels = [
+        'hadir' => 'Hadir', 'sakit' => 'Sakit', 'izin' => 'Izin',
+        'alpha' => 'Alpha', 'cuti' => 'Cuti', 'libur' => 'Libur',
+    ];
+
+    /** Kode singkat status non-hadir (untuk sel harian). */
+    private array $statusSingkat = ['sakit' => 'S', 'izin' => 'I', 'alpha' => 'A', 'cuti' => 'C', 'libur' => 'L'];
+
     /**
      * Absensi Harian.
      * Menampilkan Tanggal, Jam In, dan Jam Out untuk 7 hari terakhir per operator.
      */
-    public function harian(Request $request)
+    private function buildHarian(Request $request): array
     {
         Carbon::setLocale('id');
 
@@ -77,7 +91,7 @@ class LaporanAbsensiController extends Controller
             ];
         })->values();
 
-        return Inertia::render('LaporanAbsensi/Harian', [
+        return [
             'laporan' => $laporan,
             'hari' => $hari,
             'periode' => [
@@ -91,14 +105,19 @@ class LaporanAbsensiController extends Controller
             'operatorId' => $operatorId,
             'departemenList' => $this->departemenList(),
             'departemen' => $departemen,
-        ]);
+        ];
+    }
+
+    public function harian(Request $request)
+    {
+        return Inertia::render('LaporanAbsensi/Harian', $this->buildHarian($request));
     }
 
     /**
      * Laporan Absensi Mingguan.
      * Menampilkan grid harian (Senin–Minggu) beserta rekap status per operator.
      */
-    public function mingguan(Request $request)
+    private function buildMingguan(Request $request): array
     {
         Carbon::setLocale('id');
 
@@ -158,7 +177,7 @@ class LaporanAbsensiController extends Controller
             ];
         })->values();
 
-        return Inertia::render('LaporanAbsensi/Mingguan', [
+        return [
             'laporan' => $laporan,
             'hari' => $hari,
             'periode' => [
@@ -170,14 +189,19 @@ class LaporanAbsensiController extends Controller
             'totals' => $this->hitungTotal($laporan),
             'departemenList' => $this->departemenList(),
             'departemen' => $departemen,
-        ]);
+        ];
+    }
+
+    public function mingguan(Request $request)
+    {
+        return Inertia::render('LaporanAbsensi/Mingguan', $this->buildMingguan($request));
     }
 
     /**
      * Laporan Absensi Bulanan.
      * Rekap jumlah tiap status per operator dalam satu bulan.
      */
-    public function bulanan(Request $request)
+    private function buildBulanan(Request $request): array
     {
         Carbon::setLocale('id');
 
@@ -218,7 +242,7 @@ class LaporanAbsensiController extends Controller
             ];
         })->values();
 
-        return Inertia::render('LaporanAbsensi/Bulanan', [
+        return [
             'laporan' => $laporan,
             'bulan' => $bulan,
             'periode' => $periode->isoFormat('MMMM Y'),
@@ -226,14 +250,19 @@ class LaporanAbsensiController extends Controller
             'totals' => $this->hitungTotal($laporan),
             'departemenList' => $this->departemenList(),
             'departemen' => $departemen,
-        ]);
+        ];
+    }
+
+    public function bulanan(Request $request)
+    {
+        return Inertia::render('LaporanAbsensi/Bulanan', $this->buildBulanan($request));
     }
 
     /**
      * Laporan Absensi Tahunan.
      * Matriks kehadiran per bulan (12 kolom) + rekap status per operator.
      */
-    public function tahunan(Request $request)
+    private function buildTahunan(Request $request): array
     {
         Carbon::setLocale('id');
 
@@ -280,7 +309,7 @@ class LaporanAbsensiController extends Controller
             ];
         })->values();
 
-        return Inertia::render('LaporanAbsensi/Tahunan', [
+        return [
             'laporan' => $laporan,
             'tahun' => (string) $tahun,
             'bulanLabels' => $bulanLabels,
@@ -288,7 +317,284 @@ class LaporanAbsensiController extends Controller
             'totals' => $this->hitungTotal($laporan),
             'departemenList' => $this->departemenList(),
             'departemen' => $departemen,
+        ];
+    }
+
+    public function tahunan(Request $request)
+    {
+        return Inertia::render('LaporanAbsensi/Tahunan', $this->buildTahunan($request));
+    }
+
+    /**
+     * Ekspor laporan absensi ke Excel/PDF.
+     * GET /laporan-absensi/{jenis}/export?format=excel|pdf (+ filter yang sama seperti halaman).
+     */
+    public function export(Request $request, string $jenis)
+    {
+        abort_unless(in_array($jenis, ['harian', 'mingguan', 'bulanan', 'tahunan'], true), 404);
+
+        $format = $request->get('format', 'excel');
+        $data = match ($jenis) {
+            'harian' => $this->buildHarian($request),
+            'mingguan' => $this->buildMingguan($request),
+            'bulanan' => $this->buildBulanan($request),
+            'tahunan' => $this->buildTahunan($request),
+        };
+
+        $table = $this->tableFor($jenis, $data);
+
+        return $format === 'pdf'
+            ? $this->exportPdf($table)
+            : $this->exportExcel($table);
+    }
+
+    /**
+     * Ubah hasil build menjadi struktur tabel datar untuk ekspor:
+     * ['title', 'periode', 'headers' => [...], 'rows' => [[...], ...], 'filename'].
+     */
+    private function tableFor(string $jenis, array $data): array
+    {
+        return match ($jenis) {
+            'harian' => $this->tableHarian($data),
+            'mingguan' => $this->tableMingguan($data),
+            'bulanan' => $this->tableBulanan($data),
+            'tahunan' => $this->tableTahunan($data),
+        };
+    }
+
+    private function tableHarian(array $data): array
+    {
+        $headers = ['No', 'Nama', 'Jabatan'];
+        foreach ($data['hari'] as $h) {
+            $headers[] = $h['label'] . ' In';
+            $headers[] = $h['label'] . ' Out';
+        }
+        $headers[] = 'Total Kehadiran';
+
+        $rows = [];
+        foreach ($data['laporan'] as $i => $op) {
+            $row = [$i + 1, $op['nama'], $op['jabatan']];
+            foreach ($data['hari'] as $h) {
+                $sel = $op['harian'][$h['tanggal']] ?? null;
+                $row[] = $this->selHarian($sel, 'in');
+                $row[] = $this->selHarian($sel, 'out');
+            }
+            $row[] = $op['total_kehadiran'];
+            $rows[] = $row;
+        }
+
+        return [
+            'title' => 'Laporan Absensi Harian',
+            'periode' => 'Periode: ' . $data['periode']['mulai'] . ' – ' . $data['periode']['selesai'],
+            'headers' => $headers,
+            'rows' => $rows,
+            'filename' => 'laporan-absensi-harian',
+        ];
+    }
+
+    /** Nilai sel In/Out untuk ekspor: jam bila ada, kode status bila non-hadir, selain itu strip. */
+    private function selHarian(?array $sel, string $field): string
+    {
+        $jam = $sel[$field] ?? null;
+        if ($jam) {
+            return substr((string) $jam, 0, 5);
+        }
+        $status = $sel['status'] ?? null;
+        if ($status && $status !== 'hadir') {
+            return $this->statusSingkat[$status] ?? '-';
+        }
+        return '-';
+    }
+
+    private function tableMingguan(array $data): array
+    {
+        $headers = ['No', 'Nama', 'Jabatan'];
+        foreach ($data['hari'] as $h) {
+            $headers[] = $h['hari'] . ' ' . $h['label'];
+        }
+        foreach ($data['statuses'] as $s) {
+            $headers[] = $this->statusLabels[$s];
+        }
+
+        $rows = [];
+        foreach ($data['laporan'] as $i => $op) {
+            $row = [$i + 1, $op['nama'], $op['jabatan']];
+            foreach ($data['hari'] as $h) {
+                $abs = $op['harian'][$h['tanggal']] ?? null;
+                $row[] = $abs ? strtoupper(substr($abs['status'], 0, 1)) : '-';
+            }
+            foreach ($data['statuses'] as $s) {
+                $row[] = $op['counts'][$s] ?? 0;
+            }
+            $rows[] = $row;
+        }
+
+        return [
+            'title' => 'Laporan Absensi Mingguan',
+            'periode' => 'Periode: ' . $data['periode']['mulai'] . ' – ' . $data['periode']['selesai'],
+            'headers' => $headers,
+            'rows' => $rows,
+            'filename' => 'laporan-absensi-mingguan',
+        ];
+    }
+
+    private function tableBulanan(array $data): array
+    {
+        $headers = ['No', 'Nama', 'Jabatan'];
+        foreach ($data['statuses'] as $s) {
+            $headers[] = $this->statusLabels[$s];
+        }
+        $headers[] = 'Hari Kerja';
+        $headers[] = '% Hadir';
+
+        $rows = [];
+        foreach ($data['laporan'] as $i => $op) {
+            $row = [$i + 1, $op['nama'], $op['jabatan']];
+            foreach ($data['statuses'] as $s) {
+                $row[] = $op['counts'][$s] ?? 0;
+            }
+            $row[] = $op['hari_kerja'];
+            $row[] = $op['persentase'] . '%';
+            $rows[] = $row;
+        }
+
+        return [
+            'title' => 'Laporan Absensi Bulanan',
+            'periode' => 'Rekap Bulan: ' . $data['periode'],
+            'headers' => $headers,
+            'rows' => $rows,
+            'filename' => 'laporan-absensi-bulanan',
+        ];
+    }
+
+    private function tableTahunan(array $data): array
+    {
+        $headers = ['No', 'Nama', 'Jabatan'];
+        foreach ($data['bulanLabels'] as $label) {
+            $headers[] = $label;
+        }
+        foreach ($data['statuses'] as $s) {
+            $headers[] = $this->statusLabels[$s];
+        }
+        $headers[] = 'Total Hadir';
+
+        $rows = [];
+        foreach ($data['laporan'] as $i => $op) {
+            $row = [$i + 1, $op['nama'], $op['jabatan']];
+            foreach ($op['hadir_per_bulan'] as $h) {
+                $row[] = $h;
+            }
+            foreach ($data['statuses'] as $s) {
+                $row[] = $op['counts'][$s] ?? 0;
+            }
+            $row[] = $op['total_hadir'];
+            $rows[] = $row;
+        }
+
+        return [
+            'title' => 'Laporan Absensi Tahunan',
+            'periode' => 'Tahun ' . $data['tahun'],
+            'headers' => $headers,
+            'rows' => $rows,
+            'filename' => 'laporan-absensi-tahunan-' . $data['tahun'],
+        ];
+    }
+
+    private function exportExcel(array $table): StreamedResponse
+    {
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+        $sheet->setTitle('Laporan');
+
+        $lastCol = Coordinate::stringFromColumnIndex(count($table['headers']));
+
+        $sheet->setCellValue('A1', $table['title']);
+        $sheet->mergeCells("A1:{$lastCol}1");
+        $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(14);
+
+        $sheet->setCellValue('A2', $table['periode']);
+        $sheet->mergeCells("A2:{$lastCol}2");
+
+        // Header tabel di baris 4.
+        $col = 1;
+        foreach ($table['headers'] as $h) {
+            $sheet->setCellValue(Coordinate::stringFromColumnIndex($col) . '4', $h);
+            $col++;
+        }
+        $sheet->getStyle("A4:{$lastCol}4")->getFont()->setBold(true);
+
+        // Isi baris mulai baris 5.
+        $r = 5;
+        foreach ($table['rows'] as $row) {
+            $col = 1;
+            foreach ($row as $val) {
+                $sheet->setCellValueExplicit(
+                    Coordinate::stringFromColumnIndex($col) . $r,
+                    (string) $val,
+                    DataType::TYPE_STRING
+                );
+                $col++;
+            }
+            $r++;
+        }
+
+        for ($c = 1; $c <= count($table['headers']); $c++) {
+            $sheet->getColumnDimension(Coordinate::stringFromColumnIndex($c))->setAutoSize(true);
+        }
+
+        $filename = $table['filename'] . '.xlsx';
+
+        return response()->streamDownload(function () use ($spreadsheet) {
+            (new Xlsx($spreadsheet))->save('php://output');
+        }, $filename, [
+            'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
         ]);
+    }
+
+    /** Ekspor sebagai HTML siap-cetak (print-to-PDF dari browser). */
+    private function exportPdf(array $table)
+    {
+        $thead = '';
+        foreach ($table['headers'] as $h) {
+            $thead .= '<th>' . e($h) . '</th>';
+        }
+
+        $tbody = '';
+        foreach ($table['rows'] as $row) {
+            $tbody .= '<tr>';
+            foreach ($row as $i => $val) {
+                // Kolom Nama & Jabatan rata kiri.
+                $align = in_array($i, [1, 2], true) ? ' style="text-align:left"' : '';
+                $tbody .= '<td' . $align . '>' . e((string) $val) . '</td>';
+            }
+            $tbody .= '</tr>';
+        }
+
+        $title = e($table['title']);
+        $periode = e($table['periode']);
+
+        $html = <<<HTML
+<!doctype html><html lang="id"><head><meta charset="utf-8">
+<title>{$title}</title>
+<style>
+ body{font-family:Arial,sans-serif;color:#111827;margin:24px}
+ h1{font-size:18px;margin:0 0 4px}
+ .sub{color:#4b5563;margin:0 0 16px;font-size:13px}
+ table{width:100%;border-collapse:collapse;font-size:11px}
+ th,td{border:1px solid #cbd5e1;padding:5px 7px;text-align:center}
+ th{background:#1d4ed8;color:#fff}
+ @media print{.noprint{display:none}}
+ .btn{background:#1d4ed8;color:#fff;border:0;padding:8px 16px;border-radius:6px;cursor:pointer;margin-bottom:14px}
+</style></head><body>
+<button class="btn noprint" onclick="window.print()">Cetak / Simpan PDF</button>
+<h1>{$title}</h1>
+<p class="sub">{$periode}</p>
+<table><thead><tr>{$thead}</tr></thead><tbody>{$tbody}</tbody></table>
+<script>window.onload=function(){setTimeout(function(){window.print();},300);};</script>
+</body></html>
+HTML;
+
+        return response($html, 200, ['Content-Type' => 'text/html; charset=UTF-8']);
     }
 
     /** Daftar departemen unik dari operator aktif untuk isi dropdown filter. */

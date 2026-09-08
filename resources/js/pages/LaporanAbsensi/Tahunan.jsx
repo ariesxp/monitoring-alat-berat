@@ -1,6 +1,6 @@
 import AppLayout from '../../layouts/AppLayout';
 import { Head, router } from '@inertiajs/react';
-import { Printer } from 'lucide-react';
+import { Printer, FileSpreadsheet, FileText } from 'lucide-react';
 
 const statusLabels = { hadir: 'Hadir', sakit: 'Sakit', izin: 'Izin', alpha: 'Alpha', cuti: 'Cuti', libur: 'Libur' };
 const statusHeadColors = {
@@ -15,6 +15,12 @@ export default function Tahunan({ laporan, tahun, bulanLabels, statuses, totals,
     const go = (params) => router.get('/laporan-absensi/tahunan',
         { tahun, ...(departemen ? { departemen } : {}), ...params },
         { preserveState: true });
+
+    const exportUrl = (format) => {
+        const p = new URLSearchParams({ format, tahun });
+        if (departemen) p.set('departemen', departemen);
+        return `/laporan-absensi/tahunan/export?${p.toString()}`;
+    };
 
     return (
         <AppLayout title="Laporan Absensi Tahunan">
@@ -40,9 +46,17 @@ export default function Tahunan({ laporan, tahun, bulanLabels, statuses, totals,
                         {departemenList.map((d) => <option key={d} value={d}>{d}</option>)}
                     </select>
                 </div>
-                <button onClick={() => window.print()} className="inline-flex items-center gap-2 px-3 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700">
-                    <Printer className="w-4 h-4" /> Cetak
-                </button>
+                <div className="flex items-center gap-2">
+                    <a href={exportUrl('excel')} className="inline-flex items-center gap-2 px-3 py-2 bg-green-600 text-white text-sm rounded-lg hover:bg-green-700">
+                        <FileSpreadsheet className="w-4 h-4" /> Excel
+                    </a>
+                    <a href={exportUrl('pdf')} target="_blank" rel="noopener" className="inline-flex items-center gap-2 px-3 py-2 bg-red-600 text-white text-sm rounded-lg hover:bg-red-700">
+                        <FileText className="w-4 h-4" /> PDF
+                    </a>
+                    <button onClick={() => window.print()} className="inline-flex items-center gap-2 px-3 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700">
+                        <Printer className="w-4 h-4" /> Cetak
+                    </button>
+                </div>
             </div>
 
             <div className="mb-3">

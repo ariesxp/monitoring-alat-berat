@@ -61,6 +61,9 @@ Route::middleware('auth')->group(function () {
         Route::get('laporan-absensi/mingguan', [LaporanAbsensiController::class, 'mingguan'])->name('laporan-absensi.mingguan');
         Route::get('laporan-absensi/bulanan', [LaporanAbsensiController::class, 'bulanan'])->name('laporan-absensi.bulanan');
         Route::get('laporan-absensi/tahunan', [LaporanAbsensiController::class, 'tahunan'])->name('laporan-absensi.tahunan');
+        Route::get('laporan-absensi/{jenis}/export', [LaporanAbsensiController::class, 'export'])
+            ->whereIn('jenis', ['harian', 'mingguan', 'bulanan', 'tahunan'])
+            ->name('laporan-absensi.export');
         Route::resource('main-account', MainAccountController::class)->except(['show']);
         Route::resource('financial-statement-type', FinancialStatementTypeController::class)->except(['show']);
         Route::resource('account', AccountController::class)->except(['show']);
