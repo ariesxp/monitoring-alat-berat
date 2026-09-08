@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Absensi;
 use App\Models\Operator;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -554,7 +555,7 @@ class LaporanAbsensiController extends Controller
         ])->deleteFileAfterSend(true);
     }
 
-    /** Ekspor sebagai HTML siap-cetak (print-to-PDF dari browser). */
+    /** Render PDF asli (dompdf) yang langsung terunduh. */
     private function exportPdf(array $table)
     {
         $thead = '';
@@ -578,26 +579,25 @@ class LaporanAbsensiController extends Controller
 
         $html = <<<HTML
 <!doctype html><html lang="id"><head><meta charset="utf-8">
-<title>{$title}</title>
 <style>
- body{font-family:Arial,sans-serif;color:#111827;margin:24px}
- h1{font-size:18px;margin:0 0 4px}
- .sub{color:#4b5563;margin:0 0 16px;font-size:13px}
- table{width:100%;border-collapse:collapse;font-size:11px}
- th,td{border:1px solid #cbd5e1;padding:5px 7px;text-align:center}
+ body{font-family:'DejaVu Sans',sans-serif;color:#111827}
+ h1{font-size:15px;margin:0 0 3px}
+ .sub{color:#4b5563;margin:0 0 10px;font-size:10px}
+ table{width:100%;border-collapse:collapse;font-size:8px}
+ th,td{border:0.5px solid #94a3b8;padding:3px 4px;text-align:center}
  th{background:#1d4ed8;color:#fff}
- @media print{.noprint{display:none}}
- .btn{background:#1d4ed8;color:#fff;border:0;padding:8px 16px;border-radius:6px;cursor:pointer;margin-bottom:14px}
+ tbody tr:nth-child(even){background:#f1f5f9}
 </style></head><body>
-<button class="btn noprint" onclick="window.print()">Cetak / Simpan PDF</button>
 <h1>{$title}</h1>
 <p class="sub">{$periode}</p>
 <table><thead><tr>{$thead}</tr></thead><tbody>{$tbody}</tbody></table>
-<script>window.onload=function(){setTimeout(function(){window.print();},300);};</script>
 </body></html>
 HTML;
 
-        return response($html, 200, ['Content-Type' => 'text/html; charset=UTF-8']);
+        // Tabel lebar → paksa orientasi landscape.
+        $pdf = Pdf::loadHTML($html)->setPaper('a4', 'landscape');
+
+        return $pdf->download($table['filename'] . '.pdf');
     }
 
     /** Daftar departemen unik dari operator aktif untuk isi dropdown filter. */

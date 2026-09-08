@@ -72,7 +72,7 @@ export default function Harian({ laporan, hari, periode, operators, operatorId, 
                     <a href={exportUrl('excel')} className="inline-flex items-center gap-2 px-3 py-2 bg-green-600 text-white text-sm rounded-lg hover:bg-green-700">
                         <FileSpreadsheet className="w-4 h-4" /> Excel
                     </a>
-                    <a href={exportUrl('pdf')} target="_blank" rel="noopener" className="inline-flex items-center gap-2 px-3 py-2 bg-red-600 text-white text-sm rounded-lg hover:bg-red-700">
+                    <a href={exportUrl('pdf')} className="inline-flex items-center gap-2 px-3 py-2 bg-red-600 text-white text-sm rounded-lg hover:bg-red-700">
                         <FileText className="w-4 h-4" /> PDF
                     </a>
                     <button onClick={() => window.print()} className="inline-flex items-center gap-2 px-3 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700">
