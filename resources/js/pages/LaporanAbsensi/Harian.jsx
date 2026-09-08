@@ -21,19 +21,40 @@ function Sel({ data, field }) {
     return <span className="text-gray-300">-</span>;
 }
 
-export default function Harian({ laporan, hari, periode, operators, operatorId }) {
+export default function Harian({ laporan, hari, periode, operators, operatorId, departemenList = [], departemen }) {
     const cols = hari.length;
+
+    const applyFilter = (next) => {
+        const params = {
+            ...(departemen ? { departemen } : {}),
+            ...(operatorId ? { operator_id: operatorId } : {}),
+            ...next,
+        };
+        // Buang nilai kosong agar URL bersih.
+        Object.keys(params).forEach((k) => { if (!params[k]) delete params[k]; });
+        router.get('/laporan-absensi/harian', params, { preserveState: true });
+    };
 
     return (
         <AppLayout title="Laporan Absensi Harian">
             <Head title="Laporan Absensi Harian" />
 
             <div className="flex flex-wrap items-center justify-between gap-3 mb-4 print:hidden">
-                <div className="flex items-center gap-2">
-                    <label className="text-sm text-gray-600">Operator:</label>
+                <div className="flex flex-wrap items-center gap-2">
+                    <label className="text-sm text-gray-600">Departemen:</label>
+                    <select
+                        value={departemen || ''}
+                        onChange={(e) => applyFilter({ departemen: e.target.value, operator_id: '' })}
+                        className="px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                    >
+                        <option value="">Semua Departemen</option>
+                        {departemenList.map((d) => <option key={d} value={d}>{d}</option>)}
+                    </select>
+
+                    <label className="text-sm text-gray-600 ml-2">Operator:</label>
                     <select
                         value={operatorId || ''}
-                        onChange={(e) => router.get('/laporan-absensi/harian', e.target.value ? { operator_id: e.target.value } : {}, { preserveState: true })}
+                        onChange={(e) => applyFilter({ operator_id: e.target.value })}
                         className="px-3 py-2 border border-gray-300 rounded-lg text-sm"
                     >
                         <option value="">Semua Operator</option>

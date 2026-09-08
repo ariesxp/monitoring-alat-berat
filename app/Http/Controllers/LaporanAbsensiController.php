@@ -36,9 +36,11 @@ class LaporanAbsensiController extends Controller
         }
 
         $operatorId = $request->get('operator_id');
+        $departemen = $request->get('departemen');
 
         $operators = Operator::aktif()
             ->when($operatorId, fn ($q) => $q->where('id', $operatorId))
+            ->when($departemen, fn ($q) => $q->where('departemen', $departemen))
             ->orderBy('nama')
             ->get();
 
@@ -82,8 +84,18 @@ class LaporanAbsensiController extends Controller
                 'mulai' => $start->isoFormat('D MMMM Y'),
                 'selesai' => $end->isoFormat('D MMMM Y'),
             ],
-            'operators' => Operator::aktif()->orderBy('nama')->get(['id', 'nama']),
+            'operators' => Operator::aktif()
+                ->when($departemen, fn ($q) => $q->where('departemen', $departemen))
+                ->orderBy('nama')
+                ->get(['id', 'nama']),
             'operatorId' => $operatorId,
+            'departemenList' => Operator::aktif()
+                ->whereNotNull('departemen')
+                ->where('departemen', '!=', '')
+                ->distinct()
+                ->orderBy('departemen')
+                ->pluck('departemen'),
+            'departemen' => $departemen,
         ]);
     }
 
