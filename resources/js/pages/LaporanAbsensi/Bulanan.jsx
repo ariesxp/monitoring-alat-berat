@@ -8,20 +8,33 @@ const statusHeadColors = {
     alpha: 'text-gray-600', cuti: 'text-blue-700', libur: 'text-purple-700',
 };
 
-export default function Bulanan({ laporan, bulan, periode, statuses, totals }) {
+export default function Bulanan({ laporan, bulan, periode, statuses, totals, departemenList = [], departemen }) {
+    const go = (params) => router.get('/laporan-absensi/bulanan',
+        { bulan, ...(departemen ? { departemen } : {}), ...params },
+        { preserveState: true });
+
     return (
         <AppLayout title="Laporan Absensi Bulanan">
             <Head title="Laporan Absensi Bulanan" />
 
             <div className="flex flex-wrap items-center justify-between gap-3 mb-4 print:hidden">
-                <div className="flex items-center gap-2">
+                <div className="flex flex-wrap items-center gap-2">
                     <label className="text-sm text-gray-600">Pilih bulan:</label>
                     <input
                         type="month"
                         value={bulan}
-                        onChange={(e) => router.get('/laporan-absensi/bulanan', { bulan: e.target.value }, { preserveState: true })}
+                        onChange={(e) => go({ bulan: e.target.value })}
                         className="px-3 py-2 border border-gray-300 rounded-lg text-sm"
                     />
+                    <label className="text-sm text-gray-600 ml-2">Departemen:</label>
+                    <select
+                        value={departemen || ''}
+                        onChange={(e) => go({ departemen: e.target.value || undefined })}
+                        className="px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                    >
+                        <option value="">Semua Departemen</option>
+                        {departemenList.map((d) => <option key={d} value={d}>{d}</option>)}
+                    </select>
                 </div>
                 <button onClick={() => window.print()} className="inline-flex items-center gap-2 px-3 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700">
                     <Printer className="w-4 h-4" /> Cetak

@@ -11,20 +11,33 @@ const statusHeadColors = {
 const currentYear = new Date().getFullYear();
 const yearOptions = Array.from({ length: 6 }, (_, i) => currentYear - i);
 
-export default function Tahunan({ laporan, tahun, bulanLabels, statuses, totals }) {
+export default function Tahunan({ laporan, tahun, bulanLabels, statuses, totals, departemenList = [], departemen }) {
+    const go = (params) => router.get('/laporan-absensi/tahunan',
+        { tahun, ...(departemen ? { departemen } : {}), ...params },
+        { preserveState: true });
+
     return (
         <AppLayout title="Laporan Absensi Tahunan">
             <Head title="Laporan Absensi Tahunan" />
 
             <div className="flex flex-wrap items-center justify-between gap-3 mb-4 print:hidden">
-                <div className="flex items-center gap-2">
+                <div className="flex flex-wrap items-center gap-2">
                     <label className="text-sm text-gray-600">Pilih tahun:</label>
                     <select
                         value={tahun}
-                        onChange={(e) => router.get('/laporan-absensi/tahunan', { tahun: e.target.value }, { preserveState: true })}
+                        onChange={(e) => go({ tahun: e.target.value })}
                         className="px-3 py-2 border border-gray-300 rounded-lg text-sm"
                     >
                         {yearOptions.map((y) => <option key={y} value={y}>{y}</option>)}
+                    </select>
+                    <label className="text-sm text-gray-600 ml-2">Departemen:</label>
+                    <select
+                        value={departemen || ''}
+                        onChange={(e) => go({ departemen: e.target.value || undefined })}
+                        className="px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                    >
+                        <option value="">Semua Departemen</option>
+                        {departemenList.map((d) => <option key={d} value={d}>{d}</option>)}
                     </select>
                 </div>
                 <button onClick={() => window.print()} className="inline-flex items-center gap-2 px-3 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700">

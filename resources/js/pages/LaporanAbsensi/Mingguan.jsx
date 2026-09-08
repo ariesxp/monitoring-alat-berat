@@ -8,20 +8,33 @@ const statusColors = {
     alpha: 'bg-gray-200 text-gray-600', cuti: 'bg-blue-100 text-blue-700', libur: 'bg-purple-100 text-purple-700',
 };
 
-export default function Mingguan({ laporan, hari, periode, statuses, totals }) {
+export default function Mingguan({ laporan, hari, periode, statuses, totals, departemenList = [], departemen }) {
+    const go = (params) => router.get('/laporan-absensi/mingguan',
+        { tanggal: periode.tanggal, ...(departemen ? { departemen } : {}), ...params },
+        { preserveState: true });
+
     return (
         <AppLayout title="Laporan Absensi Mingguan">
             <Head title="Laporan Absensi Mingguan" />
 
             <div className="flex flex-wrap items-center justify-between gap-3 mb-4 print:hidden">
-                <div className="flex items-center gap-2">
+                <div className="flex flex-wrap items-center gap-2">
                     <label className="text-sm text-gray-600">Pilih minggu (tanggal):</label>
                     <input
                         type="date"
                         value={periode.tanggal}
-                        onChange={(e) => router.get('/laporan-absensi/mingguan', { tanggal: e.target.value }, { preserveState: true })}
+                        onChange={(e) => go({ tanggal: e.target.value })}
                         className="px-3 py-2 border border-gray-300 rounded-lg text-sm"
                     />
+                    <label className="text-sm text-gray-600 ml-2">Departemen:</label>
+                    <select
+                        value={departemen || ''}
+                        onChange={(e) => go({ departemen: e.target.value || undefined })}
+                        className="px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                    >
+                        <option value="">Semua Departemen</option>
+                        {departemenList.map((d) => <option key={d} value={d}>{d}</option>)}
+                    </select>
                 </div>
                 <button onClick={() => window.print()} className="inline-flex items-center gap-2 px-3 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700">
                     <Printer className="w-4 h-4" /> Cetak

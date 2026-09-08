@@ -89,12 +89,7 @@ class LaporanAbsensiController extends Controller
                 ->orderBy('nama')
                 ->get(['id', 'nama']),
             'operatorId' => $operatorId,
-            'departemenList' => Operator::aktif()
-                ->whereNotNull('departemen')
-                ->where('departemen', '!=', '')
-                ->distinct()
-                ->orderBy('departemen')
-                ->pluck('departemen'),
+            'departemenList' => $this->departemenList(),
             'departemen' => $departemen,
         ]);
     }
@@ -122,7 +117,12 @@ class LaporanAbsensiController extends Controller
             ];
         }
 
-        $operators = Operator::aktif()->orderBy('nama')->get();
+        $departemen = $request->get('departemen');
+
+        $operators = Operator::aktif()
+            ->when($departemen, fn ($q) => $q->where('departemen', $departemen))
+            ->orderBy('nama')
+            ->get();
 
         $absensi = Absensi::whereBetween('tanggal', [$start->toDateString(), $end->toDateString()])
             ->get()
@@ -168,6 +168,8 @@ class LaporanAbsensiController extends Controller
             ],
             'statuses' => $this->statuses,
             'totals' => $this->hitungTotal($laporan),
+            'departemenList' => $this->departemenList(),
+            'departemen' => $departemen,
         ]);
     }
 
@@ -183,7 +185,12 @@ class LaporanAbsensiController extends Controller
         [$year, $month] = explode('-', $bulan);
         $periode = Carbon::createFromDate($year, $month, 1);
 
-        $operators = Operator::aktif()->orderBy('nama')->get();
+        $departemen = $request->get('departemen');
+
+        $operators = Operator::aktif()
+            ->when($departemen, fn ($q) => $q->where('departemen', $departemen))
+            ->orderBy('nama')
+            ->get();
 
         $absensi = Absensi::whereYear('tanggal', $year)
             ->whereMonth('tanggal', $month)
@@ -217,6 +224,8 @@ class LaporanAbsensiController extends Controller
             'periode' => $periode->isoFormat('MMMM Y'),
             'statuses' => $this->statuses,
             'totals' => $this->hitungTotal($laporan),
+            'departemenList' => $this->departemenList(),
+            'departemen' => $departemen,
         ]);
     }
 
@@ -235,7 +244,12 @@ class LaporanAbsensiController extends Controller
             $bulanLabels[] = Carbon::createFromDate($tahun, $m, 1)->isoFormat('MMM');
         }
 
-        $operators = Operator::aktif()->orderBy('nama')->get();
+        $departemen = $request->get('departemen');
+
+        $operators = Operator::aktif()
+            ->when($departemen, fn ($q) => $q->where('departemen', $departemen))
+            ->orderBy('nama')
+            ->get();
 
         $absensi = Absensi::whereYear('tanggal', $tahun)
             ->get()
@@ -272,7 +286,20 @@ class LaporanAbsensiController extends Controller
             'bulanLabels' => $bulanLabels,
             'statuses' => $this->statuses,
             'totals' => $this->hitungTotal($laporan),
+            'departemenList' => $this->departemenList(),
+            'departemen' => $departemen,
         ]);
+    }
+
+    /** Daftar departemen unik dari operator aktif untuk isi dropdown filter. */
+    private function departemenList()
+    {
+        return Operator::aktif()
+            ->whereNotNull('departemen')
+            ->where('departemen', '!=', '')
+            ->distinct()
+            ->orderBy('departemen')
+            ->pluck('departemen');
     }
 
     /** Hitung total tiap status untuk baris footer. */
