@@ -11,7 +11,6 @@ use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
 use PhpOffice\PhpSpreadsheet\Cell\DataType;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
-use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class LaporanAbsensiController extends Controller
 {
@@ -500,7 +499,7 @@ class LaporanAbsensiController extends Controller
         ];
     }
 
-    private function exportExcel(array $table): StreamedResponse
+    private function exportExcel(array $table)
     {
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
@@ -544,11 +543,15 @@ class LaporanAbsensiController extends Controller
 
         $filename = $table['filename'] . '.xlsx';
 
-        return response()->streamDownload(function () use ($spreadsheet) {
-            (new Xlsx($spreadsheet))->save('php://output');
-        }, $filename, [
+        // Tulis penuh ke file temp lebih dulu agar setiap error terjadi sebelum
+        // output dikirim (tercatat di log & memunculkan halaman error yang benar,
+        // bukan gagal di tengah stream), lalu unduh file tersebut.
+        $tmp = tempnam(sys_get_temp_dir(), 'labs') . '.xlsx';
+        (new Xlsx($spreadsheet))->save($tmp);
+
+        return response()->download($tmp, $filename, [
             'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-        ]);
+        ])->deleteFileAfterSend(true);
     }
 
     /** Ekspor sebagai HTML siap-cetak (print-to-PDF dari browser). */
