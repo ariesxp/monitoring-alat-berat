@@ -21,13 +21,15 @@ function Sel({ data, field }) {
     return <span className="text-gray-300">-</span>;
 }
 
-export default function Harian({ laporan, hari, periode, operators, operatorId, departemenList = [], departemen }) {
+export default function Harian({ laporan, hari, periode, operators, operatorId, dari, sampai, departemenList = [], departemen }) {
     const cols = hari.length;
 
     const applyFilter = (next) => {
         const params = {
             ...(departemen ? { departemen } : {}),
             ...(operatorId ? { operator_id: operatorId } : {}),
+            ...(dari ? { dari } : {}),
+            ...(sampai ? { sampai } : {}),
             ...next,
         };
         // Buang nilai kosong agar URL bersih.
@@ -39,6 +41,8 @@ export default function Harian({ laporan, hari, periode, operators, operatorId, 
         const p = new URLSearchParams({ format });
         if (departemen) p.set('departemen', departemen);
         if (operatorId) p.set('operator_id', operatorId);
+        if (dari) p.set('dari', dari);
+        if (sampai) p.set('sampai', sampai);
         return `/laporan-absensi/harian/export?${p.toString()}`;
     };
 
@@ -79,6 +83,32 @@ export default function Harian({ laporan, hari, periode, operators, operatorId, 
                         <Printer className="w-4 h-4" /> Cetak
                     </button>
                 </div>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-2 mb-4 print:hidden">
+                <label className="text-sm text-gray-600">Dari tanggal:</label>
+                <input
+                    type="date"
+                    value={dari || ''}
+                    onChange={(e) => applyFilter({ dari: e.target.value })}
+                    className="px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                />
+                <label className="text-sm text-gray-600">Sampai tanggal:</label>
+                <input
+                    type="date"
+                    value={sampai || ''}
+                    onChange={(e) => applyFilter({ sampai: e.target.value })}
+                    className="px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                />
+                {(dari || sampai) && (
+                    <button
+                        type="button"
+                        onClick={() => applyFilter({ dari: '', sampai: '' })}
+                        className="px-3 py-2 text-sm text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50"
+                    >
+                        Reset rentang
+                    </button>
+                )}
             </div>
 
             <div className="mb-4">

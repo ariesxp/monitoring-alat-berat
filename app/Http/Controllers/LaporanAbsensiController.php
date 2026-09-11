@@ -35,12 +35,29 @@ class LaporanAbsensiController extends Controller
     {
         Carbon::setLocale('id');
 
-        $end = now()->startOfDay();
-        $start = (clone $end)->subDays(6);
+        $dari = $request->get('dari');
+        $sampai = $request->get('sampai');
 
-        // Susun 7 tanggal (dari terlama ke terbaru) sebagai kolom.
+        // Jika rentang tanggal lengkap diisi pakai itu; selain itu 7 hari terakhir.
+        if ($dari && $sampai) {
+            $start = Carbon::parse($dari)->startOfDay();
+            $end = Carbon::parse($sampai)->startOfDay();
+            if ($end->lt($start)) {
+                [$start, $end] = [$end, $start];
+            }
+            // Batasi maksimal 62 hari agar tabel tetap terkelola.
+            if ($start->diffInDays($end) > 61) {
+                $end = (clone $start)->addDays(61);
+            }
+        } else {
+            $end = now()->startOfDay();
+            $start = (clone $end)->subDays(6);
+        }
+
+        // Susun tanggal (dari terlama ke terbaru) sebagai kolom.
+        $jumlahHari = $start->diffInDays($end) + 1;
         $hari = [];
-        for ($d = 0; $d < 7; $d++) {
+        for ($d = 0; $d < $jumlahHari; $d++) {
             $tgl = (clone $start)->addDays($d);
             $hari[] = [
                 'tanggal' => $tgl->toDateString(),
@@ -103,6 +120,8 @@ class LaporanAbsensiController extends Controller
                 ->orderBy('nama')
                 ->get(['id', 'nama']),
             'operatorId' => $operatorId,
+            'dari' => $dari,
+            'sampai' => $sampai,
             'departemenList' => $this->departemenList(),
             'departemen' => $departemen,
         ];
@@ -206,8 +225,11 @@ class LaporanAbsensiController extends Controller
         Carbon::setLocale('id');
 
         $bulan = $request->get('bulan', now()->format('Y-m'));
-        [$year, $month] = explode('-', $bulan);
-        $periode = Carbon::createFromDate($year, $month, 1);
+        $dari = $request->get('dari');
+        $sampai = $request->get('sampai');
+
+        // Jika rentang tanggal lengkap diisi, gunakan itu; selain itu pakai bulan.
+        $pakaiRentang = $dari && $sampai;
 
         $departemen = $request->get('departemen');
 
@@ -216,10 +238,24 @@ class LaporanAbsensiController extends Controller
             ->orderBy('nama')
             ->get();
 
-        $absensi = Absensi::whereYear('tanggal', $year)
-            ->whereMonth('tanggal', $month)
-            ->get()
-            ->groupBy('operator_id');
+        if ($pakaiRentang) {
+            $start = Carbon::parse($dari)->startOfDay();
+            $end = Carbon::parse($sampai)->startOfDay();
+            if ($end->lt($start)) {
+                [$start, $end] = [$end, $start];
+            }
+            $absensi = Absensi::whereBetween('tanggal', [$start->toDateString(), $end->toDateString()])
+                ->get()
+                ->groupBy('operator_id');
+            $periodeLabel = $start->isoFormat('D MMMM Y') . ' – ' . $end->isoFormat('D MMMM Y');
+        } else {
+            [$year, $month] = explode('-', $bulan);
+            $absensi = Absensi::whereYear('tanggal', $year)
+                ->whereMonth('tanggal', $month)
+                ->get()
+                ->groupBy('operator_id');
+            $periodeLabel = Carbon::createFromDate($year, $month, 1)->isoFormat('MMMM Y');
+        }
 
         $laporan = $operators->map(function ($op) use ($absensi) {
             $records = $absensi->get($op->id) ?? collect();
@@ -245,7 +281,9 @@ class LaporanAbsensiController extends Controller
         return [
             'laporan' => $laporan,
             'bulan' => $bulan,
-            'periode' => $periode->isoFormat('MMMM Y'),
+            'dari' => $pakaiRentang ? $start->toDateString() : $dari,
+            'sampai' => $pakaiRentang ? $end->toDateString() : $sampai,
+            'periode' => $periodeLabel,
             'statuses' => $this->statuses,
             'totals' => $this->hitungTotal($laporan),
             'departemenList' => $this->departemenList(),
@@ -460,7 +498,7 @@ class LaporanAbsensiController extends Controller
 
         return [
             'title' => 'Laporan Absensi Bulanan',
-            'periode' => 'Rekap Bulan: ' . $data['periode'],
+            'periode' => 'Rekap Periode: ' . $data['periode'],
             'headers' => $headers,
             'rows' => $rows,
             'filename' => 'laporan-absensi-bulanan',

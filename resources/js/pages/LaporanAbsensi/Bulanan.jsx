@@ -8,13 +8,31 @@ const statusHeadColors = {
     alpha: 'text-gray-600', cuti: 'text-blue-700', libur: 'text-purple-700',
 };
 
-export default function Bulanan({ laporan, bulan, periode, statuses, totals, departemenList = [], departemen }) {
-    const go = (params) => router.get('/laporan-absensi/bulanan',
-        { bulan, ...(departemen ? { departemen } : {}), ...params },
-        { preserveState: true });
+export default function Bulanan({ laporan, bulan, dari, sampai, periode, statuses, totals, departemenList = [], departemen }) {
+    const pakaiRentang = Boolean(dari && sampai);
+
+    const go = (params) => {
+        const next = {
+            bulan,
+            ...(dari ? { dari } : {}),
+            ...(sampai ? { sampai } : {}),
+            ...(departemen ? { departemen } : {}),
+            ...params,
+        };
+        Object.keys(next).forEach((k) => {
+            if (next[k] === undefined || next[k] === '') delete next[k];
+        });
+        router.get('/laporan-absensi/bulanan', next, { preserveState: true });
+    };
 
     const exportUrl = (format) => {
-        const p = new URLSearchParams({ format, bulan });
+        const p = new URLSearchParams({ format });
+        if (pakaiRentang) {
+            p.set('dari', dari);
+            p.set('sampai', sampai);
+        } else {
+            p.set('bulan', bulan);
+        }
         if (departemen) p.set('departemen', departemen);
         return `/laporan-absensi/bulanan/export?${p.toString()}`;
     };
@@ -29,9 +47,32 @@ export default function Bulanan({ laporan, bulan, periode, statuses, totals, dep
                     <input
                         type="month"
                         value={bulan}
-                        onChange={(e) => go({ bulan: e.target.value })}
+                        onChange={(e) => go({ bulan: e.target.value, dari: undefined, sampai: undefined })}
                         className="px-3 py-2 border border-gray-300 rounded-lg text-sm"
                     />
+                    <label className="text-sm text-gray-600 ml-2">Dari tanggal:</label>
+                    <input
+                        type="date"
+                        value={dari || ''}
+                        onChange={(e) => go({ dari: e.target.value || undefined })}
+                        className="px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                    />
+                    <label className="text-sm text-gray-600">Sampai tanggal:</label>
+                    <input
+                        type="date"
+                        value={sampai || ''}
+                        onChange={(e) => go({ sampai: e.target.value || undefined })}
+                        className="px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                    />
+                    {(dari || sampai) && (
+                        <button
+                            type="button"
+                            onClick={() => go({ dari: undefined, sampai: undefined })}
+                            className="px-3 py-2 text-sm text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50"
+                        >
+                            Reset rentang
+                        </button>
+                    )}
                     <label className="text-sm text-gray-600 ml-2">Departemen:</label>
                     <select
                         value={departemen || ''}
@@ -56,7 +97,9 @@ export default function Bulanan({ laporan, bulan, periode, statuses, totals, dep
             </div>
 
             <div className="mb-3">
-                <h2 className="text-base font-semibold text-gray-800">Rekap Bulan: {periode}</h2>
+                <h2 className="text-base font-semibold text-gray-800">
+                    {pakaiRentang ? 'Rekap Periode' : 'Rekap Bulan'}: {periode}
+                </h2>
             </div>
 
             <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
