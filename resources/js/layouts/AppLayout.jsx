@@ -7,7 +7,7 @@ import {
     FolderTree, ListTree, ShoppingCart, Package, UserCog, ShieldCheck,
     KeyRound, History, PanelLeftClose, PanelLeftOpen,
     ListChecks, TrendingUp, Scale, CalendarRange, CalendarClock, CalendarCheck, Clock, Gauge,
-    BriefcaseBusiness
+    BriefcaseBusiness, Settings
 } from 'lucide-react';
 
 const menuItems = [
@@ -52,6 +52,8 @@ const menuItems = [
     { label: 'Roles', href: '/role', icon: ShieldCheck, roles: ['admin'] },
     { label: 'Permissions', href: '/permission', icon: KeyRound, roles: ['admin'] },
     { label: 'Audit Log', href: '/audit-log', icon: History, roles: ['admin'] },
+    { type: 'separator', label: 'Sistem', roles: ['admin'] },
+    { label: 'Pengaturan', href: '/pengaturan', icon: Settings, roles: ['admin'] },
 ];
 
 export default function AppLayout({ children, title }) {

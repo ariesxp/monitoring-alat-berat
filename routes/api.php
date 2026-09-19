@@ -12,6 +12,7 @@ use App\Http\Controllers\Api\PegawaiController;
 use App\Http\Controllers\Api\PengeluaranController;
 use App\Http\Controllers\Api\RekapController;
 use App\Http\Controllers\Api\SettingController;
+use App\Http\Controllers\Api\VerifikasiController;
 use Illuminate\Support\Facades\Route;
 
 Route::post('/webhook/fonnte', [\App\Http\Controllers\Api\WhatsappWebhookController::class, 'handle'])
@@ -47,6 +48,10 @@ Route::prefix('v1')->group(function () {
         // Ringkasan & laporan
         Route::get('/dashboard', [DashboardController::class, 'index']);
         Route::get('/laporan', [LaporanController::class, 'index']);
+
+        // Verifikasi Hasil Kerja (Ritase & BBM) oleh petugas gudang
+        Route::get('/verifikasi', [VerifikasiController::class, 'index']);
+        Route::post('/verifikasi/{id}/setujui', [VerifikasiController::class, 'setujui']);
 
         /*
         |----------------------------------------------------------------

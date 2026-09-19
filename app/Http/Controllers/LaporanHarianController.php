@@ -151,4 +151,30 @@ class LaporanHarianController extends Controller
         return redirect()->route('laporan-harian.index')
             ->with('success', 'Laporan harian berhasil dihapus.');
     }
+
+    /**
+     * Verifikasi (setujui) Ritase & BBM sebuah laporan harian dari web.
+     * Koreksi opsional: bila diisi, menjadi nilai final; else pakai nilai driver.
+     */
+    public function setujui(Request $request, LaporanHarian $laporanHarian)
+    {
+        $validated = $request->validate([
+            'ritase_koreksi' => 'nullable|integer|min:0',
+            'bbm_koreksi'    => 'nullable|numeric|min:0',
+        ]);
+
+        if ($laporanHarian->status_verifikasi === 'disetujui') {
+            return back()->with('error', 'Laporan sudah disetujui sebelumnya.');
+        }
+
+        $laporanHarian->update([
+            'ritase_koreksi'    => $validated['ritase_koreksi'] ?? null,
+            'bbm_koreksi'       => $validated['bbm_koreksi'] ?? null,
+            'status_verifikasi' => 'disetujui',
+            'verified_by'       => auth()->id(),
+            'verified_at'       => now(),
+        ]);
+
+        return back()->with('success', 'Hasil kerja berhasil diverifikasi (disetujui).');
+    }
 }

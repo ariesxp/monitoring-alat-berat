@@ -1,8 +1,16 @@
 import AppLayout from '../../layouts/AppLayout';
-import { Head, Link } from '@inertiajs/react';
-import { ArrowLeft, Smartphone, MessageSquare, Globe, MapPin, Clock, Gauge, Package, FileText } from 'lucide-react';
+import { Head, Link, useForm } from '@inertiajs/react';
+import { ArrowLeft, Smartphone, MessageSquare, Globe, MapPin, Clock, Gauge, Package, FileText, Truck, Fuel, ShieldCheck, CheckCircle } from 'lucide-react';
 
 export default function Show({ laporan }) {
+    const verif = useForm({ ritase_koreksi: '', bbm_koreksi: '' });
+    const submitSetujui = (e) => {
+        e.preventDefault();
+        verif.post(`/laporan-harian/${laporan.id}/setujui`, { preserveScroll: true });
+    };
+    const disetujui = laporan.status_verifikasi === 'disetujui';
+    const ritaseFinal = laporan.ritase_koreksi ?? laporan.ritase;
+    const bbmFinal = laporan.bbm_koreksi ?? laporan.bbm_liter;
     const Info = ({ label, value }) => (
         <div>
             <dt className="text-xs text-gray-500">{label}</dt>
@@ -123,6 +131,78 @@ export default function Show({ laporan }) {
                         />
                     </dl>
                 </Section>
+            </div>
+
+            <div className="mt-4">
+                <div className="bg-white rounded-xl border border-gray-200 p-5">
+                    <div className="flex items-center justify-between mb-4">
+                        <div className="flex items-center gap-2">
+                            <ShieldCheck className="w-4 h-4 text-gray-500" />
+                            <h3 className="text-sm font-semibold text-gray-700">Verifikasi Hasil Kerja (Ritase &amp; BBM)</h3>
+                        </div>
+                        <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium ${disetujui ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'}`}>
+                            {disetujui ? <CheckCircle className="w-3.5 h-3.5" /> : null}
+                            {disetujui ? 'Disetujui' : 'Menunggu Verifikasi'}
+                        </span>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div className="rounded-lg border border-gray-200 p-4">
+                            <div className="flex items-center gap-2 text-gray-500 mb-1"><Truck className="w-4 h-4" /><span className="text-xs">Ritase (Driver)</span></div>
+                            <div className="text-2xl font-bold text-gray-800">{laporan.ritase ?? '-'} <span className="text-sm font-normal text-gray-400">Ritase</span></div>
+                        </div>
+                        <div className="rounded-lg border border-gray-200 p-4">
+                            <div className="flex items-center gap-2 text-gray-500 mb-1"><Fuel className="w-4 h-4" /><span className="text-xs">BBM (Driver)</span></div>
+                            <div className="text-2xl font-bold text-gray-800">{laporan.bbm_liter != null ? num(laporan.bbm_liter) : '-'} <span className="text-sm font-normal text-gray-400">{laporan.jenis_bbm ? `${laporan.jenis_bbm} • Liter` : 'Liter'}</span></div>
+                        </div>
+                    </div>
+
+                    {disetujui ? (
+                        <div className="mt-4 rounded-lg bg-green-50 border border-green-200 px-4 py-3">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
+                                <div>
+                                    <span className="text-gray-500">Ritase final: </span>
+                                    <b className="text-green-700">{ritaseFinal ?? '-'}</b>
+                                    {laporan.ritase_koreksi != null && <span className="text-xs text-amber-600"> (dikoreksi dari {laporan.ritase})</span>}
+                                </div>
+                                <div>
+                                    <span className="text-gray-500">BBM final: </span>
+                                    <b className="text-green-700">{bbmFinal != null ? `${num(bbmFinal)} L` : '-'}</b>
+                                    {laporan.bbm_koreksi != null && <span className="text-xs text-amber-600"> (dikoreksi dari {num(laporan.bbm_liter)} L)</span>}
+                                </div>
+                            </div>
+                            {laporan.verified_at && (
+                                <p className="text-xs text-gray-500 mt-2">Diverifikasi pada {new Date(laporan.verified_at).toLocaleString('id-ID')}</p>
+                            )}
+                        </div>
+                    ) : (
+                        <form onSubmit={submitSetujui} className="mt-4">
+                            <p className="text-xs text-gray-500 mb-2">Koreksi opsional — kosongkan bila nilai driver sudah benar.</p>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div>
+                                    <label className="text-xs text-gray-500">Koreksi Ritase</label>
+                                    <input type="number" min="0" value={verif.data.ritase_koreksi}
+                                        onChange={(e) => verif.setData('ritase_koreksi', e.target.value)}
+                                        placeholder={`mis. ${laporan.ritase ?? 0}`}
+                                        className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-green-500 focus:ring-green-500" />
+                                    {verif.errors.ritase_koreksi && <p className="text-xs text-red-600 mt-1">{verif.errors.ritase_koreksi}</p>}
+                                </div>
+                                <div>
+                                    <label className="text-xs text-gray-500">Koreksi BBM (Liter)</label>
+                                    <input type="number" min="0" step="0.01" value={verif.data.bbm_koreksi}
+                                        onChange={(e) => verif.setData('bbm_koreksi', e.target.value)}
+                                        placeholder={`mis. ${laporan.bbm_liter ?? 0}`}
+                                        className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-green-500 focus:ring-green-500" />
+                                    {verif.errors.bbm_koreksi && <p className="text-xs text-red-600 mt-1">{verif.errors.bbm_koreksi}</p>}
+                                </div>
+                            </div>
+                            <button type="submit" disabled={verif.processing}
+                                className="mt-4 inline-flex items-center gap-2 px-5 py-2.5 bg-green-600 text-white text-sm font-semibold rounded-lg hover:bg-green-700 disabled:opacity-60">
+                                <CheckCircle className="w-4 h-4" /> {verif.processing ? 'Memproses...' : 'Setujui'}
+                            </button>
+                        </form>
+                    )}
+                </div>
             </div>
 
             {laporan.catatan && (

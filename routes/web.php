@@ -20,6 +20,7 @@ use App\Http\Controllers\OperatorController;
 use App\Http\Controllers\PenerimaanGudangController;
 use App\Http\Controllers\PengeluaranGudangController;
 use App\Http\Controllers\BarangController;
+use App\Http\Controllers\PengaturanController;
 use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\PettyCashController;
 use App\Http\Controllers\ProfileController;
@@ -92,6 +93,13 @@ Route::middleware('auth')->group(function () {
         Route::get('statistik', [StatistikController::class, 'index'])->name('statistik.index');
         Route::get('laporan-km/bulanan', [LaporanKmController::class, 'bulanan'])->name('laporan-km.bulanan');
         Route::resource('pengeluaran-gudang', PengeluaranGudangController::class);
+
+        // Pengaturan (settings umum + kantor cabang/offices)
+        Route::get('pengaturan', [PengaturanController::class, 'index'])->name('pengaturan.index');
+        Route::put('pengaturan', [PengaturanController::class, 'updateSettings'])->name('pengaturan.update');
+        Route::post('pengaturan/office', [PengaturanController::class, 'storeOffice'])->name('pengaturan.office.store');
+        Route::put('pengaturan/office/{office}', [PengaturanController::class, 'updateOffice'])->name('pengaturan.office.update');
+        Route::delete('pengaturan/office/{office}', [PengaturanController::class, 'destroyOffice'])->name('pengaturan.office.destroy');
     });
 
     // Gudang - Master Barang & Purchase Request
@@ -100,6 +108,7 @@ Route::middleware('auth')->group(function () {
     Route::post('purchase-request/{purchase_request}/approve', [PurchaseRequestController::class, 'approve'])->name('purchase-request.approve');
 
     // All roles
+    Route::post('laporan-harian/{laporanHarian}/setujui', [LaporanHarianController::class, 'setujui'])->name('laporan-harian.setujui');
     Route::resource('laporan-harian', LaporanHarianController::class);
     Route::resource('penerimaan-gudang', PenerimaanGudangController::class)->only(['index', 'create', 'store', 'show']);
     Route::get('stok-gudang', [StokGudangController::class, 'index'])->name('stok-gudang.index');
