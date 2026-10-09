@@ -67,12 +67,23 @@ class RolePermissionSeeder extends Seeder
             'is_locked' => true,
         ]);
 
+        $accounting = Role::firstOrCreate(['slug' => 'accounting'], [
+            'name' => 'Accounting',
+            'description' => 'Akses menu Finance & Laporan Keuangan',
+            'is_locked' => true,
+        ]);
+
         // Admin: semua permission
         $admin->permissions()->sync($allPermissionIds);
 
         // Supervisor: semua kecuali Manajemen User & Keuangan
         $supervisor->permissions()->sync(
             Permission::whereNotIn('group', ['Manajemen User', 'Keuangan'])->pluck('id')
+        );
+
+        // Accounting: hanya modul Keuangan
+        $accounting->permissions()->sync(
+            Permission::where('group', 'Keuangan')->pluck('id')
         );
 
         // Operator: hanya view + create laporan/gudang dasar

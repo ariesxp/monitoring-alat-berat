@@ -65,6 +65,17 @@ Route::middleware('auth')->group(function () {
         Route::get('laporan-absensi/{jenis}/export', [LaporanAbsensiController::class, 'export'])
             ->whereIn('jenis', ['harian', 'mingguan', 'bulanan', 'tahunan'])
             ->name('laporan-absensi.export');
+
+        // Manajemen User
+        Route::resource('user', UserController::class)->except(['show']);
+        Route::resource('role', RoleController::class)->except(['show']);
+        Route::resource('permission', PermissionController::class)->except(['show']);
+        Route::get('audit-log', [AuditLogController::class, 'index'])->name('audit-log.index');
+        Route::get('audit-log/{auditLog}', [AuditLogController::class, 'show'])->name('audit-log.show');
+    });
+
+    // Admin + Accounting: Finance & Laporan Keuangan
+    Route::middleware('role:admin,accounting')->group(function () {
         Route::resource('main-account', MainAccountController::class)->except(['show']);
         Route::resource('financial-statement-type', FinancialStatementTypeController::class)->except(['show']);
         Route::resource('account', AccountController::class)->except(['show']);
@@ -73,13 +84,6 @@ Route::middleware('auth')->group(function () {
         Route::get('laba-rugi', [FinancialReportController::class, 'labaRugi'])->name('laba-rugi.index');
         Route::get('neraca', [FinancialReportController::class, 'neraca'])->name('neraca.index');
         Route::get('trial-balance', [FinancialReportController::class, 'trialBalance'])->name('trial-balance.index');
-
-        // Manajemen User
-        Route::resource('user', UserController::class)->except(['show']);
-        Route::resource('role', RoleController::class)->except(['show']);
-        Route::resource('permission', PermissionController::class)->except(['show']);
-        Route::get('audit-log', [AuditLogController::class, 'index'])->name('audit-log.index');
-        Route::get('audit-log/{auditLog}', [AuditLogController::class, 'show'])->name('audit-log.show');
     });
 
     // Admin + Supervisor
@@ -102,14 +106,16 @@ Route::middleware('auth')->group(function () {
         Route::delete('pengaturan/office/{office}', [PengaturanController::class, 'destroyOffice'])->name('pengaturan.office.destroy');
     });
 
-    // Gudang - Master Barang & Purchase Request
-    Route::resource('barang', BarangController::class);
-    Route::resource('purchase-request', PurchaseRequestController::class);
-    Route::post('purchase-request/{purchase_request}/approve', [PurchaseRequestController::class, 'approve'])->name('purchase-request.approve');
+    // Admin + Supervisor + Operator (accounting tidak termasuk)
+    Route::middleware('role:admin,supervisor,operator')->group(function () {
+        // Gudang - Master Barang & Purchase Request
+        Route::resource('barang', BarangController::class);
+        Route::resource('purchase-request', PurchaseRequestController::class);
+        Route::post('purchase-request/{purchase_request}/approve', [PurchaseRequestController::class, 'approve'])->name('purchase-request.approve');
 
-    // All roles
-    Route::post('laporan-harian/{laporanHarian}/setujui', [LaporanHarianController::class, 'setujui'])->name('laporan-harian.setujui');
-    Route::resource('laporan-harian', LaporanHarianController::class);
-    Route::resource('penerimaan-gudang', PenerimaanGudangController::class)->only(['index', 'create', 'store', 'show']);
-    Route::get('stok-gudang', [StokGudangController::class, 'index'])->name('stok-gudang.index');
+        Route::post('laporan-harian/{laporanHarian}/setujui', [LaporanHarianController::class, 'setujui'])->name('laporan-harian.setujui');
+        Route::resource('laporan-harian', LaporanHarianController::class);
+        Route::resource('penerimaan-gudang', PenerimaanGudangController::class)->only(['index', 'create', 'store', 'show']);
+        Route::get('stok-gudang', [StokGudangController::class, 'index'])->name('stok-gudang.index');
+    });
 });
