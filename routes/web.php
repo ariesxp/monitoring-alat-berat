@@ -74,8 +74,8 @@ Route::middleware('auth')->group(function () {
         Route::get('audit-log/{auditLog}', [AuditLogController::class, 'show'])->name('audit-log.show');
     });
 
-    // Admin + Accounting: Finance & Laporan Keuangan
-    Route::middleware('role:admin,accounting')->group(function () {
+    // Admin + Accounting + Keuangan: Finance & Laporan Keuangan
+    Route::middleware('role:admin,accounting,keuangan')->group(function () {
         Route::resource('main-account', MainAccountController::class)->except(['show']);
         Route::resource('financial-statement-type', FinancialStatementTypeController::class)->except(['show']);
         Route::resource('account', AccountController::class)->except(['show']);
@@ -106,7 +106,7 @@ Route::middleware('auth')->group(function () {
         Route::delete('pengaturan/office/{office}', [PengaturanController::class, 'destroyOffice'])->name('pengaturan.office.destroy');
     });
 
-    // Admin + Supervisor + Operator (accounting tidak termasuk)
+    // Admin + Supervisor + Operator (accounting & keuangan tidak termasuk)
     Route::middleware('role:admin,supervisor,operator')->group(function () {
         // Gudang - Master Barang & Purchase Request
         Route::resource('barang', BarangController::class);
